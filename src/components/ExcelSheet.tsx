@@ -33,16 +33,16 @@ const ExcelSheet = () => {
     if (!hot) return;
 
     const data = hot.getData();
-    console.log("ข้อมูลทั้งหมดจากตาราง:", data);
     const filtered = data.filter((row: any) =>
-      row.some((cell: any) => cell && cell !== "")
+      row.some((cell: any) => cell && cell !== "" && cell !== null)
     );
+    console.log("ข้อมูลทั้งหมดจากตาราง:", filtered);
     if (filtered.length === 0) {
       showWarning("กรุณากรอกข้อมูลในตารางก่อนทำการบันทึก");
       return;
     }
 
-    mutation.mutate(filtered);
+    // mutation.mutate(filtered);
   };
 
   return (
