@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Sarabun } from "next/font/google";
 import "./globals.css";
 import { MySidebar } from "@/components/MySidebar";
+import { Toaster } from "@/components/ui/sonner";
 
 const sarabun = Sarabun({
   subsets: ["thai"],
@@ -31,6 +32,7 @@ export default function RootLayout({
               </div>
             </div>
           </MySidebar>
+          <Toaster richColors />
         </QueryClientProvider>
       </body>
     </html>

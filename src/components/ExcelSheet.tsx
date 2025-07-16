@@ -2,13 +2,15 @@
 
 import { HotTable } from "@handsontable/react-wrapper";
 import { registerAllModules } from "handsontable/registry";
-import "handsontable/styles/handsontable.css";
-import "handsontable/styles/ht-theme-main.css";
 import { useRef } from "react";
 import { Button } from "./ui/button";
+import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import { showError, showWarning } from "@/lib/swal";
+import { uploadInternData } from "@/lib/api";
+
+import "handsontable/styles/handsontable.css";
+import "handsontable/styles/ht-theme-main.css";
 
 registerAllModules();
 
@@ -16,12 +18,9 @@ const ExcelSheet = () => {
   const hotRef = useRef<any>(null);
 
   const mutation = useMutation({
-    mutationFn: async (rows: string[][]) => {
-      const res = await axios.post("/api/save", { rows });
-      return res.data;
-    },
+    mutationFn: uploadInternData,
     onSuccess: (data) => {
-      alert(`✅ บันทึกข้อมูลสำเร็จ ${data.count} แถว`);
+      toast.success(`บันทึกข้อมูลสำเร็จ ${data.count} แถว`);
     },
     onError: () => {
       showError("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
@@ -34,7 +33,7 @@ const ExcelSheet = () => {
 
     const data = hot.getData();
     const filtered = data.filter((row: any) =>
-      row.some((cell: any) => cell && cell !== "" && cell !== null)
+      row.some((cell: any) => cell && cell !== "")
     );
     console.log("ข้อมูลทั้งหมดจากตาราง:", filtered);
     if (filtered.length === 0) {
@@ -42,7 +41,7 @@ const ExcelSheet = () => {
       return;
     }
 
-    // mutation.mutate(filtered);
+    mutation.mutate(filtered);
   };
 
   return (
