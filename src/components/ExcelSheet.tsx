@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { showError, showWarning } from "@/lib/swal";
 import { uploadInternData } from "@/lib/api";
+import { Loader } from "./Loader";
 
 import "handsontable/styles/handsontable.css";
 import "handsontable/styles/ht-theme-main.css";
@@ -46,6 +47,7 @@ const ExcelSheet = () => {
 
   return (
     <div className="flex flex-col gap-4">
+      {mutation.isPending && <Loader variant="full" size="lg" />}
       <HotTable
         ref={hotRef}
         themeName="ht-theme-main"
