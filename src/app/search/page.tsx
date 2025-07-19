@@ -1,31 +1,27 @@
 "use client";
 
-import Title from "@/components/Title";
 import React, { useEffect, useState } from "react";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { fetchInterns } from "@/lib/api";
+import { z } from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader } from "@/components/Loader";
 import { PaginationControlled } from "@/components/PaginationControlled";
+import Title from "@/components/Title";
+import SearchForm from "@/components/SearchForm";
+import { SearchFormValidation } from "@/lib/validation";
 
 const page = () => {
   const [page, setPage] = useState(1);
+  const [options, setOptions] = useState({});
   const pageSize = 100;
 
-  const { data, isLoading, isError, isFetching } = useQuery({
-    queryKey: ["interns", page],
-    queryFn: () => fetchInterns({ page, pageSize }),
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+    queryKey: ["interns", page, options],
+    queryFn: () => fetchInterns({ page, pageSize, options }),
   });
 
   useEffect(() => {
@@ -36,21 +32,27 @@ const page = () => {
 
   const totalPages = data ? Math.ceil(data.total / pageSize) : 0;
 
+  const onSubmitData = (values: z.infer<typeof SearchFormValidation>) => {
+    const cleanedValues = Object.fromEntries(
+      Object.entries(values).filter(([_, v]) => v !== "")
+    );
+    setOptions(cleanedValues);
+    refetch();
+  };
+
   return (
     <>
       <Title>ค้นหาเด็กฝึกงาน</Title>
       <Card>
         <CardHeader>
-          <CardTitle>Card Title</CardTitle>
-          <CardDescription>Card Description</CardDescription>
-          <CardAction>Card Action</CardAction>
+          <CardTitle>ตัวกรอง</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>Card Content</p>
+          <SearchForm
+            onSubmitData={onSubmitData}
+            isLoading={isLoading || isFetching}
+          />
         </CardContent>
-        <CardFooter>
-          <p>Card Footer</p>
-        </CardFooter>
       </Card>
 
       {isLoading || isFetching ? (

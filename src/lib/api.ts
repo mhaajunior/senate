@@ -9,15 +9,25 @@ export const uploadInternData = async (rows: string[][]) => {
 export const fetchInterns = async ({
   page,
   pageSize,
+  options,
 }: {
   page: number;
   pageSize: number;
+  options: FilterOptions;
 }): Promise<InternsResponse> => {
   const res = await axios.get("/api/intern", {
-    params: { page, pageSize },
+    params: { page, pageSize, ...options },
   });
   return res.data;
 };
+
+interface FilterOptions {
+  firstName?: string;
+  latsName?: string;
+  academy?: string;
+  startDate?: Date;
+  endDate?: Date;
+}
 
 interface InternsResponse extends BaseResponse {
   data: Intern[];

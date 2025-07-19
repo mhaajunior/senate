@@ -62,20 +62,58 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") ?? "1", 10);
     const pageSize = parseInt(searchParams.get("pageSize") ?? "100", 10);
+    const internStatus = parseInt(searchParams.get("internStatus") ?? "1", 10);
+    const firstName = searchParams.get("firstName");
+    const lastName = searchParams.get("lastName");
+    const academy = searchParams.get("academy");
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
+    const office = searchParams.get("office");
+    const group = searchParams.get("group");
 
     const skip = (page - 1) * pageSize;
     const take = pageSize;
 
-    const [data, total] = await Promise.all([
-      prisma.intern.findMany({
-        skip,
-        take,
-        orderBy: { sendDate: "asc" },
-      }),
-      prisma.intern.count(),
-    ]);
+    const where: any = {};
 
-    return NextResponse.json({ success: true, data, total });
+    if (firstName) {
+      where.firstName = { contains: firstName };
+    }
+    if (lastName) {
+      where.lastName = { contains: lastName };
+    }
+    if (academy) {
+      where.academy = { contains: academy };
+    }
+    if (startDate) {
+      where.startDate = startDate;
+    }
+    if (endDate) {
+      where.endDate = endDate;
+    }
+    if (office) {
+      where.office = { contains: office };
+    }
+    if (group) {
+      where.group = { contains: group };
+    }
+
+    if (internStatus === 1) {
+      const [data, total] = await Promise.all([
+        prisma.intern.findMany({
+          skip,
+          take,
+          where,
+          orderBy: { sendDate: "asc" },
+        }),
+        prisma.intern.count({ where }),
+      ]);
+
+      return NextResponse.json({ success: true, data, total });
+    } else {
+      // TODO: หาจากตารางที่ verify แล้ว
+      return NextResponse.json({ success: true });
+    }
   } catch (error) {
     return NextResponse.json(
       { error: "ไม่สามารถดึงข้อมูล intern ได้" },
