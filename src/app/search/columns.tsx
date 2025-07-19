@@ -26,9 +26,10 @@ export type Intern = {
 
 export const columns: ColumnDef<Intern>[] = [
   {
-    accessorKey: "id",
-    header: "รหัส",
-    size: 50,
+    id: "rowNumber",
+    header: "ลำดับ",
+    cell: ({ row }) => row.index + 1,
+    enableSorting: false,
   },
   {
     accessorKey: "sendDate",
@@ -67,31 +68,26 @@ export const columns: ColumnDef<Intern>[] = [
     accessorKey: "firstName",
     header: "ชื่อ",
     accessorFn: (row) => isNull(row.firstName),
-    size: 150,
   },
   {
     accessorKey: "lastName",
     header: "นามสกุล",
     accessorFn: (row) => isNull(row.lastName),
-    size: 150,
   },
   {
     accessorKey: "academy",
     header: "สถานศึกษา",
     accessorFn: (row) => isNull(row.academy),
-    size: 200,
   },
   {
     accessorKey: "faculty",
     header: "คณะ",
     accessorFn: (row) => isNull(row.faculty),
-    size: 200,
   },
   {
     accessorKey: "branch",
     header: "สาขา",
     accessorFn: (row) => isNull(row.branch),
-    size: 200,
   },
   {
     accessorKey: "phone",
@@ -102,7 +98,6 @@ export const columns: ColumnDef<Intern>[] = [
     accessorKey: "email",
     header: "อีเมล",
     accessorFn: (row) => isNull(row.email),
-    size: 200,
   },
   {
     accessorKey: "startDate",

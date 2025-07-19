@@ -67,7 +67,7 @@ export function MySidebar({ children }: { children: React.ReactNode }) {
           </div>
         </SidebarBody>
       </Sidebar>
-      <div className="flex flex-col flex-1 w-full h-full">
+      <div className="flex flex-col flex-1 w-full h-full overflow-x-auto">
         <Navbar />
         {children}
       </div>
@@ -79,7 +79,7 @@ export const Logo = () => {
   return (
     <Link
       href="#"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+      className="font-normal flex space-x-2 items-center text-sm py-1 relative z-20"
     >
       <div className="h-5 w-6 bg-primary rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
       <motion.span

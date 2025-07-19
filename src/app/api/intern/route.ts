@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
       prisma.intern.findMany({
         skip,
         take,
-        orderBy: { id: "desc" },
+        orderBy: { sendDate: "asc" },
       }),
       prisma.intern.count(),
     ]);

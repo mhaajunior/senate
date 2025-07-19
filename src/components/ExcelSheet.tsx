@@ -19,6 +19,7 @@ const ExcelSheet = () => {
   const hotRef = useRef<any>(null);
 
   const mutation = useMutation({
+    mutationKey: ["interns"],
     mutationFn: uploadInternData,
     onSuccess: (data) => {
       toast.success(`บันทึกข้อมูลสำเร็จ ${data.count} แถว`);
@@ -36,7 +37,7 @@ const ExcelSheet = () => {
     const filtered = data.filter((row: any) =>
       row.some((cell: any) => cell && cell !== "")
     );
-    console.log("ข้อมูลทั้งหมดจากตาราง:", filtered);
+
     if (filtered.length === 0) {
       showWarning("กรุณากรอกข้อมูลในตารางก่อนทำการบันทึก");
       return;

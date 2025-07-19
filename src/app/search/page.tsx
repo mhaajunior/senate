@@ -23,7 +23,7 @@ const page = () => {
   const [page, setPage] = useState(1);
   const pageSize = 100;
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, isFetching } = useQuery({
     queryKey: ["interns", page],
     queryFn: () => fetchInterns({ page, pageSize }),
   });
@@ -53,7 +53,7 @@ const page = () => {
         </CardFooter>
       </Card>
 
-      {isLoading ? (
+      {isLoading || isFetching ? (
         <div className="flex justify-center">
           <Loader />
         </div>
