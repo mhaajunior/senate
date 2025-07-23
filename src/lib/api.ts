@@ -23,7 +23,7 @@ export const fetchInterns = async ({
     params: {
       page: String(page),
       pageSize: String(pageSize),
-      status: String(status),
+      statusId: String(status),
       ...options,
     },
   });
@@ -36,6 +36,21 @@ export const editIntern = async (
   const res = await axios.put("/api/intern", {
     intern,
   });
+  return res.data;
+};
+
+export const fetchStatus = async (): Promise<BaseResponse> => {
+  const res = await axios.get("/api/status");
+  return res.data;
+};
+
+export const fetchOffice = async (): Promise<BaseResponse> => {
+  const res = await axios.get("/api/office");
+  return res.data;
+};
+
+export const fetchGroup = async (): Promise<BaseResponse> => {
+  const res = await axios.get("/api/group");
   return res.data;
 };
 

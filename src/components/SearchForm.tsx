@@ -13,9 +13,11 @@ import {
   SearchFormValidationType,
 } from "@/lib/validation";
 import SubmitButton from "./SubmitButton";
-import { groupOptions, officeOptions, SelectOption } from "@/lib/options";
+import { GroupSelectOption, SelectOption } from "@/lib/options";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { fetchGroup, fetchOffice } from "@/lib/api";
 
 const SearchForm = ({
   onSubmitData,
@@ -26,6 +28,8 @@ const SearchForm = ({
   isLoading: boolean;
   internStatus: string;
 }) => {
+  const [officeOptions, setOfficeOptions] = useState<SelectOption[]>([]);
+  const [groupOptions, setGroupOptions] = useState<GroupSelectOption[]>([]);
   const [filteredGroup, setFilteredGroup] = useState<SelectOption[]>([]);
 
   const form = useForm<SearchFormValidationType>({
@@ -39,9 +43,33 @@ const SearchForm = ({
 
   const office = form.watch("office");
 
+  const { data: officeResponse, isSuccess: isSuccess1 } = useQuery({
+    queryKey: ["office"],
+    queryFn: () => fetchOffice(),
+  });
+
+  const { data: groupResponse, isSuccess: isSuccess2 } = useQuery({
+    queryKey: ["group"],
+    queryFn: () => fetchGroup(),
+  });
+
   const onSubmit = async (values: SearchFormValidationType) => {
     onSubmitData(values);
   };
+
+  useEffect(() => {
+    if (isSuccess1 && officeResponse?.results?.office) {
+      const { office } = officeResponse?.results;
+      setOfficeOptions(office);
+    }
+  }, [isSuccess1, officeResponse]);
+
+  useEffect(() => {
+    if (isSuccess2 && groupResponse?.results?.group) {
+      const { group } = groupResponse?.results;
+      setGroupOptions(group);
+    }
+  }, [isSuccess2, groupResponse]);
 
   useEffect(() => {
     if (internStatus === "1") {

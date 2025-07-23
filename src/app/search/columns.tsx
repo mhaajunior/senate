@@ -6,6 +6,7 @@ import { formatThaiDateTime, isNull } from "@/lib/utils";
 import { InternDataType } from "@/lib/validation";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import StatusColumn from "./StatusColumn";
 
 export const columns: ColumnDef<InternDataType>[] = [
   {
@@ -147,9 +148,13 @@ export const columns: ColumnDef<InternDataType>[] = [
       return <EditDialog intern={intern} />;
     },
   },
-  {
-    accessorKey: "status",
-    header: "สำนัก/กลุ่มงาน/ลักษณะงาน ที่สนใจฝึกงาน",
-    accessorFn: (row) => isNull(row.preferredJob),
-  },
+  // {
+  //   accessorKey: "status",
+  //   header: "สถานะ",
+  //   cell: ({ row }) => {
+  //     const intern = row.original;
+
+  //     return <StatusColumn defaultVal={intern.statusId} />;
+  //   },
+  // },
 ];

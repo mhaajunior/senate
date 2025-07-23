@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { StatusSelectOption } from "./options";
 
 const thaiPhoneRegex = /^(06|08|09)\d{8}$/;
 
 export const InternStatusValidation = z.object({
-  internStatus: z.enum(["1", "2"]),
+  internStatus: z.string(),
 });
 
 export type InternStatusValidationType = z.infer<typeof InternStatusValidation>;
@@ -62,12 +63,13 @@ export const InternValidation = z.object({
   preferredJob: z
     .string({ message: "ข้อมูลไม่ถูกต้อง" })
     .min(1, { message: "กรุณากรอกข้อมูล" }),
-  status: z.number(),
+  statusId: z.string(),
 });
 
 export type InternValidationType = z.infer<typeof InternValidation>;
 
 export type InternDataType = InternValidationType & {
+  status: StatusSelectOption;
   sendDate: Date;
   updatedAt: Date;
   createdAt: Date;

@@ -5,7 +5,7 @@ import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { fetchInterns } from "@/lib/api";
+import { fetchInterns, fetchStatus } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader } from "@/components/Loader";
 import { PaginationControlled } from "@/components/PaginationControlled";
@@ -16,29 +16,25 @@ import {
   InternStatusValidationType,
   SearchFormValidationType,
 } from "@/lib/validation";
-import {
-  internStatusOptions,
-  requestStatusOptions,
-  verifyStatusOptions,
-} from "@/lib/options";
+import { internStatusOptions, StatusSelectOption } from "@/lib/options";
 import TableSelection from "@/components/TableSelection";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import CustomFormField, { FormFieldType } from "@/components/CustomFormField";
 import { SelectItem } from "@/components/ui/select";
+import StatusSelection from "@/components/StatusSelection";
 
 type FilterOptions = InternStatusValidationType & SearchFormValidationType;
 
 const page = () => {
   const [page, setPage] = useState(1);
-  const [selection, setSelection] = useState(requestStatusOptions);
+  const [requestStatus, setRequestStatus] = useState<StatusSelectOption[]>([]);
+  const [verifyStatus, setVerifyStatus] = useState<StatusSelectOption[]>([]);
+  const [selection, setSelection] = useState<StatusSelectOption[]>([]);
   const [options, setOptions] = useState<FilterOptions>({ internStatus: "1" });
   const [status, setStatus] = useState(1);
   const pageSize = 100;
-  const parentVerifyStatusOptions = verifyStatusOptions.filter(
-    (item) => !item.parentId
-  );
 
   const form = useForm<InternStatusValidationType>({
     resolver: zodResolver(InternStatusValidation),
@@ -53,6 +49,26 @@ const page = () => {
     queryKey: ["interns", page, options, status],
     queryFn: () => fetchInterns({ page, pageSize, status, options }),
   });
+
+  const { data: statusResponse, isSuccess } = useQuery({
+    queryKey: ["status"],
+    queryFn: () => fetchStatus(),
+  });
+
+  useEffect(() => {
+    if (isSuccess && statusResponse?.results?.status) {
+      const { status } = statusResponse?.results;
+      const requestStatusOptions = status.filter(
+        (s: StatusSelectOption) => s.type === 1
+      );
+      setRequestStatus(requestStatusOptions);
+      const parentVerifyStatusOptions = status.filter(
+        (s: StatusSelectOption) => s.type === 2 && !s.parentId
+      );
+      setVerifyStatus(parentVerifyStatusOptions);
+      setSelection(requestStatusOptions);
+    }
+  }, [isSuccess, statusResponse]);
 
   useEffect(() => {
     if (isError) {
@@ -91,9 +107,9 @@ const page = () => {
       };
     });
     if (values.internStatus === "1") {
-      setSelection(requestStatusOptions);
+      setSelection(requestStatus);
     } else {
-      setSelection(parentVerifyStatusOptions);
+      setSelection(verifyStatus);
     }
     refetch();
   };
@@ -102,7 +118,7 @@ const page = () => {
     <>
       <Title>ค้นหาเด็กฝึกงาน</Title>
 
-      <Form {...form}>
+      {/* <Form {...form}>
         <form className="flex flex-col gap-6">
           <div className="flex gap-6 flex-wrap">
             <CustomFormField
@@ -129,7 +145,18 @@ const page = () => {
             </CustomFormField>
           </div>
         </form>
-      </Form>
+      </Form> */}
+      <StatusSelection
+        form={form}
+        statusOptions={internStatusOptions}
+        loading={isLoading || isFetching}
+        fieldName="internStatus"
+        label="สถานะหลัก"
+        submitFnc={(val, form) => {
+          form.setValue("internStatus", val);
+          form.handleSubmit(onChangeInternStatus)();
+        }}
+      />
 
       <Card>
         <CardHeader>

@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTrigger,
@@ -8,27 +8,33 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { InternValidation, InternValidationType } from "@/lib/validation";
+import {
+  InternDataType,
+  InternValidation,
+  InternValidationType,
+} from "@/lib/validation";
 import { Form } from "./ui/form";
 import SubmitButton from "./SubmitButton";
 import CustomFormField, { FormFieldType } from "./CustomFormField";
 import { ScrollArea } from "./ui/scroll-area";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { showError } from "@/lib/swal";
-import { editIntern } from "@/lib/api";
+import { editIntern, fetchStatus } from "@/lib/api";
 import { toast } from "sonner";
 import { RefreshCcw } from "lucide-react";
 import { SelectItem } from "./ui/select";
-import { requestStatusOptions } from "@/lib/options";
+import { StatusSelectOption } from "@/lib/options";
 
-export function EditDialog({ intern }: { intern: InternValidationType }) {
+export function EditDialog({ intern }: { intern: InternDataType }) {
   const queryClient = useQueryClient();
 
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [statusOptions, setStatusOptions] = useState<StatusSelectOption[]>([]);
 
   const form = useForm<InternValidationType>({
     resolver: zodResolver(InternValidation),
@@ -37,6 +43,11 @@ export function EditDialog({ intern }: { intern: InternValidationType }) {
       startDate: new Date(intern.startDate),
       endDate: new Date(intern.endDate),
     },
+  });
+
+  const { data: statusResponse, isSuccess } = useQuery({
+    queryKey: ["status"],
+    queryFn: () => fetchStatus(),
   });
 
   const mutation = useMutation({
@@ -53,6 +64,16 @@ export function EditDialog({ intern }: { intern: InternValidationType }) {
     },
   });
 
+  useEffect(() => {
+    if (isSuccess && statusResponse?.results?.status) {
+      const { status } = statusResponse.results;
+      const filteredStatus = status.filter(
+        (s: StatusSelectOption) => s.type === intern.status.type
+      );
+      setStatusOptions(filteredStatus);
+    }
+  }, [isSuccess, statusResponse]);
+
   const onSubmit = async (value: InternValidationType) => {
     mutation.mutate(value);
     if (mutation.isSuccess) {
@@ -63,7 +84,7 @@ export function EditDialog({ intern }: { intern: InternValidationType }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="warning">แก้ไข</Button>
+        <Button variant="outline">แก้ไข</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -76,6 +97,7 @@ export function EditDialog({ intern }: { intern: InternValidationType }) {
               onClick={() => form.reset()}
             />
           </DialogTitle>
+          <DialogDescription></DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[50vh]">
           <Form {...form}>
@@ -88,12 +110,12 @@ export function EditDialog({ intern }: { intern: InternValidationType }) {
                 <CustomFormField
                   fieldType={FormFieldType.SELECT}
                   control={form.control}
-                  name="status"
+                  name="statusId"
                   label="สถานะ"
                   placeholder="เลือกสถานะ"
                   width="w-[240px]"
                 >
-                  {requestStatusOptions.map((status) => (
+                  {statusOptions.map((status) => (
                     <SelectItem key={status.id} value={String(status.id)}>
                       <div className="flex cursor-pointer items-center gap-2">
                         <p>{status.name}</p>

@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
               endDate: parse(endDate, "d/M/yyyy", new Date()),
               preferredJob,
               sendDate: parse(sendDate, "d/M/yyyy, HH:mm:ss", new Date()),
-              status: 1,
+              statusId: 1,
             },
           })
       )
@@ -75,7 +75,7 @@ export async function GET(req: NextRequest) {
     const endDate = searchParams.get("endDate");
     const office = searchParams.get("office");
     const group = searchParams.get("group");
-    const status = Number(searchParams.get("status"));
+    const statusId = Number(searchParams.get("statusId"));
 
     const skip = (page - 1) * pageSize;
     const take = pageSize;
@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const whereWithStatus = { ...where, status };
+    const whereWithStatus = { ...where, statusId };
 
     if (internStatus === 1) {
       const [data, total, groupedCount] = await Promise.all([
@@ -115,17 +115,18 @@ export async function GET(req: NextRequest) {
           take,
           where: whereWithStatus,
           orderBy: { sendDate: "asc" },
+          include: { status: true },
         }),
         prisma.intern.count({ where: whereWithStatus }),
         prisma.intern.groupBy({
-          by: ["status"],
+          by: ["statusId"],
           where,
           _count: { _all: true },
         }),
       ]);
 
       const statusCounts = groupedCount.reduce((acc, curr) => {
-        acc[curr.status] = curr._count._all;
+        acc[curr.statusId] = curr._count._all;
         return acc;
       }, {} as Record<string, number>);
 
@@ -170,7 +171,7 @@ export async function PUT(req: NextRequest) {
 
     const updatedIntern = await prisma.intern.update({
       where: { id: intern.id },
-      data,
+      data: { ...data, statusId: Number(intern.statusId) },
     });
 
     return NextResponse.json({
