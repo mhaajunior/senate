@@ -21,8 +21,9 @@ const MyDatepicker = ({ field, props }: { field: any; props: CustomProps }) => {
           <Button
             variant={"outline"}
             className={cn(
-              "w-[240px] pl-3 text-left font-normal",
-              !field.value && "text-muted-foreground"
+              "pl-3 text-left font-normal",
+              !field.value && "text-muted-foreground",
+              props.width || "w-full"
             )}
           >
             {field.value ? (
@@ -45,6 +46,7 @@ const MyDatepicker = ({ field, props }: { field: any; props: CustomProps }) => {
           captionLayout="dropdown"
           startMonth={new Date(2023, 0)}
           endMonth={new Date(currentYear + 1, 11)}
+          defaultMonth={field.value ?? new Date()}
           locale={th}
         />
       </PopoverContent>

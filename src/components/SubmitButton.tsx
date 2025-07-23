@@ -6,13 +6,20 @@ import { Loader } from "./Loader";
 interface ButtonProps {
   isLoading: boolean;
   className?: string;
+  form?: string;
   children: React.ReactNode;
 }
 
-const SubmitButton = ({ isLoading, className, children }: ButtonProps) => {
+const SubmitButton = ({
+  isLoading,
+  className,
+  form,
+  children,
+}: ButtonProps) => {
   return (
     <Button
       type="submit"
+      form={form}
       disabled={isLoading}
       className={className ?? "shad-primary-btn w-32"}
     >

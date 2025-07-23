@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatThaiDateTime(date: string, haveTime = false) {
+export function formatThaiDateTime(date: Date | string, haveTime = false) {
   if (!date) return isNull(date);
 
   const d = new Date(date);
@@ -18,12 +18,12 @@ export function formatThaiDateTime(date: string, haveTime = false) {
   });
   if (haveTime) {
     const split = formatted.split(" ");
-    return `${split[0]} ${split[1]} ${buddhistYear.toString().slice(2)} ${
+    return `${split[0]} ${split[1]} ${String(buddhistYear).slice(2)} ${
       split[2]
     }`;
   }
 
-  return `${formatted} ${buddhistYear.toString().slice(2)}`;
+  return `${formatted} ${String(buddhistYear).slice(2)}`;
 }
 
 export function isNull(x: any) {

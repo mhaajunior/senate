@@ -22,7 +22,7 @@ const ExcelSheet = () => {
     mutationKey: ["interns"],
     mutationFn: uploadInternData,
     onSuccess: (data) => {
-      toast.success(`บันทึกข้อมูลสำเร็จ ${data.count} แถว`);
+      toast.success(`บันทึกข้อมูลสำเร็จ ${data.results.count} แถว`);
     },
     onError: () => {
       showError("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");

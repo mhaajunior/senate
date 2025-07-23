@@ -1,30 +1,13 @@
 "use client";
 
+import { EditDialog } from "@/components/EditDialog";
 import { Button } from "@/components/ui/button";
 import { formatThaiDateTime, isNull } from "@/lib/utils";
+import { InternDataType } from "@/lib/validation";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
-export type Intern = {
-  id: number;
-  iden: string;
-  prefix: string;
-  firstName: string;
-  lastName: string;
-  academy: string;
-  faculty: string;
-  branch: string;
-  phone: string;
-  email: string;
-  startDate: string;
-  endDate: string;
-  preferredJob: string;
-  sendDate: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export const columns: ColumnDef<Intern>[] = [
+export const columns: ColumnDef<InternDataType>[] = [
   {
     id: "rowNumber",
     header: "ลำดับ",
@@ -56,7 +39,7 @@ export const columns: ColumnDef<Intern>[] = [
   },
   {
     accessorKey: "iden",
-    header: "หมายเลขประจำตัวประชาชน",
+    header: "ID Card",
     accessorFn: (row) => isNull(row.iden),
   },
   {
@@ -109,7 +92,7 @@ export const columns: ColumnDef<Intern>[] = [
           className="font-bold"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          วันที่เริ่มฝึกงาน
+          เริ่มฝึกงาน
           {isSorted === "asc" ? (
             <ArrowUp className="ml-2 h-4 w-4" />
           ) : isSorted === "desc" ? (
@@ -132,7 +115,7 @@ export const columns: ColumnDef<Intern>[] = [
           className="font-bold"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          วันที่สิ้นสุดฝึกงาน
+          สิ้นสุดฝึกงาน
           {isSorted === "asc" ? (
             <ArrowUp className="ml-2 h-4 w-4" />
           ) : isSorted === "desc" ? (
@@ -147,6 +130,25 @@ export const columns: ColumnDef<Intern>[] = [
   },
   {
     accessorKey: "preferredJob",
+    header: "สำนัก/กลุ่มงาน/ลักษณะงาน ที่สนใจฝึกงาน",
+    accessorFn: (row) => isNull(row.preferredJob),
+  },
+  {
+    accessorKey: "updatedAt",
+    header: "แก้ไขล่าสุด",
+    accessorFn: (row) => formatThaiDateTime(row.updatedAt, true),
+  },
+  {
+    id: "actions",
+    header: "แก้ไข",
+    cell: ({ row }) => {
+      const intern = row.original;
+
+      return <EditDialog intern={intern} />;
+    },
+  },
+  {
+    accessorKey: "status",
     header: "สำนัก/กลุ่มงาน/ลักษณะงาน ที่สนใจฝึกงาน",
     accessorFn: (row) => isNull(row.preferredJob),
   },

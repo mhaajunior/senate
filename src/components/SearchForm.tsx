@@ -8,40 +8,38 @@ import { SelectItem } from "@/components/ui/select";
 import { Form } from "@/components/ui/form";
 
 import CustomFormField, { FormFieldType } from "./CustomFormField";
-import { SearchFormValidation } from "@/lib/validation";
-import SubmitButton from "./SubmitButton";
 import {
-  groupOptions,
-  internStatusOptions,
-  officeOptions,
-  SelectOption,
-} from "@/lib/options";
+  SearchFormValidation,
+  SearchFormValidationType,
+} from "@/lib/validation";
+import SubmitButton from "./SubmitButton";
+import { groupOptions, officeOptions, SelectOption } from "@/lib/options";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 
 const SearchForm = ({
   onSubmitData,
   isLoading,
+  internStatus,
 }: {
-  onSubmitData: (values: z.infer<typeof SearchFormValidation>) => void;
+  onSubmitData: (values: SearchFormValidationType) => void;
   isLoading: boolean;
+  internStatus: string;
 }) => {
   const [filteredGroup, setFilteredGroup] = useState<SelectOption[]>([]);
 
-  const form = useForm<z.infer<typeof SearchFormValidation>>({
+  const form = useForm<SearchFormValidationType>({
     resolver: zodResolver(SearchFormValidation),
     defaultValues: {
-      internStatus: "1",
       firstName: "",
       lastName: "",
       academy: "",
     },
   });
 
-  const internStatus = form.watch("internStatus");
   const office = form.watch("office");
 
-  const onSubmit = async (values: z.infer<typeof SearchFormValidation>) => {
+  const onSubmit = async (values: SearchFormValidationType) => {
     onSubmitData(values);
   };
 
@@ -56,6 +54,7 @@ const SearchForm = ({
     const filter = groupOptions.filter(
       (group) => group.officeId === Number(office)
     );
+    form.setValue("group", "");
     setFilteredGroup(filter);
   }, [office]);
 
@@ -67,28 +66,12 @@ const SearchForm = ({
       >
         <div className="flex gap-6 flex-wrap">
           <CustomFormField
-            fieldType={FormFieldType.SELECT}
-            control={form.control}
-            name="internStatus"
-            label="สถานะ"
-            placeholder="เลือกสถานะ"
-          >
-            {internStatusOptions.map((status) => (
-              <SelectItem key={status.id} value={status.id.toString()}>
-                <div className="flex cursor-pointer items-center gap-2">
-                  <p>{status.name}</p>
-                </div>
-              </SelectItem>
-            ))}
-          </CustomFormField>
-        </div>
-        <div className="flex gap-6 flex-wrap">
-          <CustomFormField
             fieldType={FormFieldType.DATE_PICKER}
             control={form.control}
             name="startDate"
             label="วันที่เริ่มฝึกงาน"
             placeholder="เลือกวัน"
+            width="w-[240px]"
           />
           <CustomFormField
             fieldType={FormFieldType.DATE_PICKER}
@@ -96,6 +79,7 @@ const SearchForm = ({
             name="endDate"
             label="วันที่สิ้นสุดฝึกงาน"
             placeholder="เลือกวัน"
+            width="w-[240px]"
           />
         </div>
         <div className="flex gap-6 flex-wrap">
@@ -105,6 +89,7 @@ const SearchForm = ({
             name="firstName"
             label="ชื่อ"
             placeholder="กรอกชื่อ"
+            width="w-[240px]"
           />
           <CustomFormField
             fieldType={FormFieldType.INPUT}
@@ -112,6 +97,7 @@ const SearchForm = ({
             name="lastName"
             label="นามสกุล"
             placeholder="กรอกนามสกุล"
+            width="w-[240px]"
           />
           <CustomFormField
             fieldType={FormFieldType.INPUT}
@@ -119,6 +105,7 @@ const SearchForm = ({
             name="academy"
             label="สถานศึกษา"
             placeholder="กรอกสถานศึกษา"
+            width="w-[240px]"
           />
         </div>
         {internStatus === "2" && (
@@ -129,10 +116,11 @@ const SearchForm = ({
               name="office"
               label="สำนัก"
               placeholder="เลือกสำนัก"
+              width="w-[240px]"
               showClearBtn
             >
               {officeOptions.map((office) => (
-                <SelectItem key={office.id} value={office.id.toString()}>
+                <SelectItem key={office.id} value={String(office.id)}>
                   <div className="flex cursor-pointer items-center gap-2">
                     <p>{office.name}</p>
                   </div>
@@ -145,10 +133,12 @@ const SearchForm = ({
               name="group"
               label="กลุ่มงาน"
               placeholder="เลือกกลุ่มงาน"
+              width="w-[240px]"
+              disabled={filteredGroup.length === 0}
               showClearBtn
             >
               {filteredGroup.map((group) => (
-                <SelectItem key={group.id} value={group.id.toString()}>
+                <SelectItem key={group.id} value={String(group.id)}>
                   <div className="flex cursor-pointer items-center gap-2">
                     <p>{group.name}</p>
                   </div>

@@ -29,6 +29,7 @@ model Intern {
   endDate      DateTime
   preferredJob String
   sendDate     DateTime
+  status       Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

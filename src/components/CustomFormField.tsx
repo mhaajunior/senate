@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectTrigger, SelectValue } from "./ui/select";
 import { Textarea } from "./ui/textarea";
 import MyDatepicker from "./MyDatepicker";
 import { X } from "lucide-react";
+import { Loader } from "./Loader";
+import { cn } from "@/lib/utils";
 
 export enum FormFieldType {
   INPUT = "input",
@@ -39,13 +41,17 @@ export interface CustomProps {
   renderSkeleton?: (field: any) => React.ReactNode;
   fieldType: FormFieldType;
   showClearBtn?: boolean;
+  loading?: boolean;
+  submitBtn?: boolean;
+  submitFnc?: (val: any) => void;
+  width?: string;
 }
 
 const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
   switch (props.fieldType) {
     case FormFieldType.INPUT:
       return (
-        <div className="flex rounded-md border border-dark-500 bg-dark-400">
+        <div className="flex rounded-md border border-dark-500 bg-dark-400 h-fit">
           {props.iconSrc && (
             <Image
               src={props.iconSrc}
@@ -70,7 +76,7 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
           <Textarea
             placeholder={props.placeholder}
             {...field}
-            className="shad-textArea"
+            className={cn("shad-textArea", props.width || "w-full")}
             disabled={props.disabled}
           />
         </FormControl>
@@ -95,21 +101,43 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
     case FormFieldType.SELECT:
       return (
         <FormControl className="relative">
-          <Select onValueChange={field.onChange} value={field.value}>
+          <Select
+            onValueChange={(val) => {
+              field.onChange(val);
+              if (props.submitBtn) {
+                props.submitFnc!(val);
+              }
+            }}
+            value={String(field.value)}
+            disabled={props.disabled || props.loading}
+          >
             <div className="relative">
               <FormControl>
-                <SelectTrigger className="relative shad-select-trigger w-[240px] group">
+                <SelectTrigger
+                  className={cn(
+                    "relative shad-select-trigger group",
+                    props.width || "w-full"
+                  )}
+                >
                   <SelectValue placeholder={props.placeholder} />
                 </SelectTrigger>
               </FormControl>
               {field.value && props.showClearBtn && (
-                <X
-                  size={16}
-                  className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    field.onChange("");
-                  }}
+                <div className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 bg-white rounded-md dark:bg-gray-700 dark:border-black p-1">
+                  <X
+                    size={16}
+                    className="cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      field.onChange("");
+                    }}
+                  />
+                </div>
+              )}
+              {props.loading && (
+                <Loader
+                  size="sm"
+                  className="absolute right-8 top-1/2 -translate-y-1/2 opacity-75"
                 />
               )}
             </div>
@@ -127,14 +155,14 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
 };
 
 const CustomFormField = (props: CustomProps) => {
-  const { control, name, label } = props;
+  const { control, name, label, width } = props;
 
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className="w-[240px]">
+        <FormItem className={cn(width || "w-full")}>
           {props.fieldType !== FormFieldType.CHECKBOX && label && (
             <FormLabel className="shad-input-label">{label}</FormLabel>
           )}
