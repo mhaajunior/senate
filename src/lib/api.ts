@@ -39,6 +39,20 @@ export const editIntern = async (
   return res.data;
 };
 
+export const updateInternStatus = async ({
+  statusId,
+  id,
+}: {
+  statusId: string;
+  id: number;
+}): Promise<BaseResponse> => {
+  const res = await axios.patch("/api/intern", {
+    id,
+    statusId,
+  });
+  return res.data;
+};
+
 export const fetchStatus = async (): Promise<BaseResponse> => {
   const res = await axios.get("/api/status");
   return res.data;

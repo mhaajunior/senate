@@ -46,6 +46,24 @@ const ExcelSheet = () => {
     mutation.mutate(filtered);
   };
 
+  const handleAfterPaste = (data: any[][], coords: any[]) => {
+    const hotInstance = hotRef.current?.hotInstance;
+    if (!hotInstance) return;
+
+    const tableData = hotInstance.getData();
+    const lastRowIsEmpty = tableData[tableData.length - 1].every(
+      (cell: any) =>
+        cell === "" ||
+        cell === null ||
+        cell === undefined ||
+        (typeof cell === "string" && cell.trim() === "")
+    );
+
+    if (!lastRowIsEmpty) {
+      hotInstance.alter("insert_row_below", tableData.length - 1);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {mutation.isPending && <Loader variant="full" size="lg" />}
@@ -81,6 +99,7 @@ const ExcelSheet = () => {
         stretchH="all"
         autoWrapRow={true}
         autoWrapCol={true}
+        afterPaste={handleAfterPaste}
         licenseKey="non-commercial-and-evaluation"
       />
       <div className="flex justify-end">

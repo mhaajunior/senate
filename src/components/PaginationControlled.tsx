@@ -22,6 +22,9 @@ export function PaginationControlled({
   currentPage,
   onPageChange,
 }: PaginationProps) {
+  if (currentPage > totalPages) {
+    currentPage = totalPages;
+  }
   // ฟังก์ชันช่วยสร้าง array หน้าแบบมี ... (ellipsis) ถ้าจำนวนหน้ามาก
   function getPageNumbers(): (number | "ellipsis")[] {
     const delta = 2; // จำนวนหน้าที่แสดงรอบๆ หน้า current

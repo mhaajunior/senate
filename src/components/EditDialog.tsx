@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTrigger,
@@ -22,18 +22,19 @@ import { Form } from "./ui/form";
 import SubmitButton from "./SubmitButton";
 import CustomFormField, { FormFieldType } from "./CustomFormField";
 import { ScrollArea } from "./ui/scroll-area";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { editIntern, fetchStatus } from "@/lib/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { editIntern } from "@/lib/api";
 import { toast } from "sonner";
 import { RefreshCcw } from "lucide-react";
 import { SelectItem } from "./ui/select";
-import { StatusSelectOption } from "@/lib/options";
+import { useDataStore } from "@/store/useDataStore";
 
 export function EditDialog({ intern }: { intern: InternDataType }) {
   const queryClient = useQueryClient();
+  const { status } = useDataStore();
 
   const [open, setOpen] = useState(false);
-  const [statusOptions, setStatusOptions] = useState<StatusSelectOption[]>([]);
+  const filteredStatus = status.filter((s) => s.type === intern.status.type);
 
   const form = useForm<InternValidationType>({
     resolver: zodResolver(InternValidation),
@@ -41,12 +42,8 @@ export function EditDialog({ intern }: { intern: InternDataType }) {
       ...intern,
       startDate: new Date(intern.startDate),
       endDate: new Date(intern.endDate),
+      statusId: String(intern.statusId),
     },
-  });
-
-  const { data: statusResponse, isSuccess } = useQuery({
-    queryKey: ["status"],
-    queryFn: () => fetchStatus(),
   });
 
   const mutation = useMutation({
@@ -57,27 +54,15 @@ export function EditDialog({ intern }: { intern: InternDataType }) {
       queryClient.invalidateQueries({
         queryKey: ["interns"],
       });
+      setOpen(false);
     },
     onError: () => {
       toast.error("ไม่สามารถแก้ไขข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
     },
   });
 
-  useEffect(() => {
-    if (isSuccess && statusResponse?.results?.status) {
-      const { status } = statusResponse.results;
-      const filteredStatus = status.filter(
-        (s: StatusSelectOption) => s.type === intern.status.type
-      );
-      setStatusOptions(filteredStatus);
-    }
-  }, [isSuccess, statusResponse]);
-
   const onSubmit = async (value: InternValidationType) => {
     mutation.mutate(value);
-    if (mutation.isSuccess) {
-      setOpen(false);
-    }
   };
 
   return (
@@ -114,7 +99,7 @@ export function EditDialog({ intern }: { intern: InternDataType }) {
                   placeholder="เลือกสถานะ"
                   width="w-[240px]"
                 >
-                  {statusOptions.map((status) => (
+                  {filteredStatus.map((status) => (
                     <SelectItem key={status.id} value={String(status.id)}>
                       <div className="flex cursor-pointer items-center gap-2">
                         <p>{status.name}</p>

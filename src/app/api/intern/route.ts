@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { parse } from "date-fns";
-import { InternValidation, InternValidationType } from "@/lib/validation";
+import {
+  InternValidation,
+  InternValidationType,
+  StatusValidation,
+} from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
   try {
@@ -114,7 +118,7 @@ export async function GET(req: NextRequest) {
           skip,
           take,
           where: whereWithStatus,
-          orderBy: { sendDate: "asc" },
+          orderBy: [{ sendDate: "asc" }, { updatedAt: "desc" }],
           include: { status: true },
         }),
         prisma.intern.count({ where: whereWithStatus }),
@@ -164,14 +168,50 @@ export async function PUT(req: NextRequest) {
     };
 
     const valid = InternValidation.safeParse(data);
+    const found = prisma.intern.findFirst({
+      where: { id: intern.id },
+    });
 
-    if (!valid.success) {
+    if (!valid.success || !found) {
       return NextResponse.json({ error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
     }
 
     const updatedIntern = await prisma.intern.update({
       where: { id: intern.id },
       data: { ...data, statusId: Number(intern.statusId) },
+    });
+
+    return NextResponse.json({
+      success: true,
+      results: {
+        intern: updatedIntern,
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "ไม่สามารถแก้ไขข้อมูลเด็กฝึกงานได้" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { id, statusId } = body;
+
+    const valid = StatusValidation.safeParse({ statusId });
+    const found = prisma.intern.findFirst({
+      where: { id },
+    });
+
+    if (!valid.success || !found) {
+      return NextResponse.json({ error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
+    }
+
+    const updatedIntern = await prisma.intern.update({
+      where: { id },
+      data: { statusId: Number(statusId) },
     });
 
     return NextResponse.json({

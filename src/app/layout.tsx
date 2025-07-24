@@ -6,6 +6,8 @@ import "./globals.css";
 import { MySidebar } from "@/components/MySidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { useEffect } from "react";
+import { useDataStore } from "@/store/useDataStore";
 
 const sarabun = Sarabun({
   subsets: ["thai"],
@@ -19,6 +21,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { fetchOffice, fetchGroup, fetchStatus } = useDataStore();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await Promise.all([fetchOffice(), fetchGroup(), fetchStatus()]);
+    };
+    fetchData();
+  }, []);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body

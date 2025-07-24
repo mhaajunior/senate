@@ -1,58 +1,53 @@
 import StatusSelection from "@/components/StatusSelection";
-import { useInterns } from "@/hooks/useInterns";
-import { fetchStatus } from "@/lib/api";
-import { StatusSelectOption } from "@/lib/options";
+import { updateInternStatus } from "@/lib/api";
 import {
   InternDataType,
   StatusValidation,
   StatusValidationType,
 } from "@/lib/validation";
-import { useInternFilter } from "@/store/useInternFilter";
+import { useDataStore } from "@/store/useDataStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 const StatusColumn = ({ intern }: { intern: InternDataType }) => {
-  const [statusOptions, setStatusOptions] = useState<StatusSelectOption[]>([]);
-  const { page, pageSize, status, options } = useInternFilter();
-
-  // const { data, isLoading, isFetching, refetch } = useInterns({
-  //   page,
-  //   pageSize,
-  //   status,
-  //   options,
-  // });
-
-  // const { data: statusResponse, isSuccess } = useQuery({
-  //   queryKey: ["status"],
-  //   queryFn: () => fetchStatus(),
-  // });
+  const queryClient = useQueryClient();
+  const { status } = useDataStore();
+  const filteredStatus = status.filter((s) => s.type === intern.status.type);
 
   const form = useForm<StatusValidationType>({
     resolver: zodResolver(StatusValidation),
     defaultValues: { statusId: intern.statusId },
   });
 
-  // useEffect(() => {
-  //   if (isSuccess && statusResponse?.results?.status) {
-  //     const { status } = statusResponse.results;
-  //     const filteredStatus = status.filter(
-  //       (s: StatusSelectOption) => s.type === intern.status.type
-  //     );
-  //     setStatusOptions(filteredStatus);
-  //   }
-  // }, [isSuccess, statusResponse]);
+  const mutation = useMutation({
+    mutationKey: ["interns"],
+    mutationFn: updateInternStatus,
+    onSuccess: () => {
+      toast.success("เปลี่ยนสถานะสำเร็จ");
+      queryClient.invalidateQueries({
+        queryKey: ["interns"],
+      });
+    },
+    onError: () => {
+      toast.error("ไม่สามารถแก้ไขข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+    },
+  });
 
-  const onChangeStatus = async (values: StatusValidationType) => {};
+  const onChangeStatus = async (value: StatusValidationType) => {
+    mutation.mutate({ ...value, id: intern.id });
+  };
 
   return (
     <StatusSelection
       form={form}
-      statusOptions={statusOptions}
-      loading={false}
+      statusOptions={filteredStatus}
+      loading={mutation.isPending}
       fieldName="statusId"
-      width="w-[200px]"
+      width="w-[180px]"
       submitFnc={(val, form) => {
         form.setValue("statusId", val);
         form.handleSubmit(onChangeStatus)();

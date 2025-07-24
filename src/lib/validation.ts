@@ -55,7 +55,7 @@ export const InternValidation = z.object({
     .string({ message: "ข้อมูลไม่ถูกต้อง" })
     .min(1, { message: "กรุณากรอกข้อมูล" })
     .regex(thaiPhoneRegex, {
-      message: "ข้อมูลไม่ถูกต้อง)",
+      message: "ข้อมูลไม่ถูกต้อง",
     }),
   email: z
     .email({ message: "ข้อมูลไม่ถูกต้อง" })

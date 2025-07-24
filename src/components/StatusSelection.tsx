@@ -1,14 +1,7 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
-import {
-  DefaultValues,
-  FieldValues,
-  useForm,
-  UseFormReturn,
-} from "react-hook-form";
-import { ZodType } from "zod";
+import { FieldValues, UseFormReturn } from "react-hook-form";
 import CustomFormField, { FormFieldType } from "./CustomFormField";
 import { Form } from "./ui/form";
 import { SelectItem } from "./ui/select";
@@ -43,7 +36,7 @@ function StatusSelection<T extends FieldValues>({
             name={fieldName}
             label={label}
             placeholder="เลือกสถานะ"
-            width={width || "w-full"}
+            width={width}
             loading={loading}
             submitBtn={!!submitFnc}
             submitFnc={(val) => {

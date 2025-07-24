@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
-import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { fetchStatus } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader } from "@/components/Loader";
 import { PaginationControlled } from "@/components/PaginationControlled";
@@ -23,14 +21,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import StatusSelection from "@/components/StatusSelection";
 import { useInterns } from "@/hooks/useInterns";
 import { useInternFilter } from "@/store/useInternFilter";
+import { useDataStore } from "@/store/useDataStore";
+import { cn } from "@/lib/utils";
 
 const page = () => {
+  const { requestStatus, parentVerifyStatus } = useDataStore();
   const { page, setPage, pageSize, status, setStatus, options, setOptions } =
     useInternFilter();
-
-  const [requestStatus, setRequestStatus] = useState<StatusSelectOption[]>([]);
-  const [verifyStatus, setVerifyStatus] = useState<StatusSelectOption[]>([]);
   const [selection, setSelection] = useState<StatusSelectOption[]>([]);
+  const [tableHeight, setTableHeight] = useState(200);
+  const tableRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<InternStatusValidationType>({
     resolver: zodResolver(InternStatusValidation),
@@ -48,31 +48,21 @@ const page = () => {
     options,
   });
 
-  const { data: statusResponse, isSuccess } = useQuery({
-    queryKey: ["status"],
-    queryFn: () => fetchStatus(),
-  });
-
   useEffect(() => {
-    if (isSuccess && statusResponse?.results?.status) {
-      const { status } = statusResponse?.results;
-      const requestStatusOptions = status.filter(
-        (s: StatusSelectOption) => s.type === 1
-      );
-      setRequestStatus(requestStatusOptions);
-      const parentVerifyStatusOptions = status.filter(
-        (s: StatusSelectOption) => s.type === 2 && !s.parentId
-      );
-      setVerifyStatus(parentVerifyStatusOptions);
-      setSelection(requestStatusOptions);
-    }
-  }, [isSuccess, statusResponse]);
+    setSelection(requestStatus);
+  }, [requestStatus]);
 
   useEffect(() => {
     if (isError) {
       toast.error("โหลดข้อมูลไม่สำเร็จ");
     }
   }, [isError]);
+
+  useEffect(() => {
+    if (!isLoading && tableRef.current) {
+      setTableHeight(tableRef.current.offsetHeight || 200);
+    }
+  }, [isLoading, data]);
 
   const totalPages = data?.success
     ? Math.ceil(data.results.total / pageSize)
@@ -107,7 +97,7 @@ const page = () => {
     if (values.internStatus === "1") {
       setSelection(requestStatus);
     } else {
-      setSelection(verifyStatus);
+      setSelection(parentVerifyStatus);
     }
     refetch();
   };
@@ -156,11 +146,19 @@ const page = () => {
           ))}
         </div>
         {isLoading || isFetching ? (
-          <div className="flex justify-center items-center h-[60px]">
+          <div
+            className={cn(
+              "flex justify-center items-center transition-all duration-300 bg-muted",
+              isFetching ? " blur-sm opacity-60" : ""
+            )}
+            style={{ height: `${tableHeight}px` }}
+          >
             <Loader />
           </div>
         ) : (
-          <DataTable columns={columns} data={data?.results.data || []} />
+          <div ref={tableRef}>
+            <DataTable columns={columns} data={data?.results.data || []} />
+          </div>
         )}
       </div>
       {!isLoading && !isFetching && totalPages > 1 && (

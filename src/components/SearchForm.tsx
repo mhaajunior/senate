@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import { SelectItem } from "@/components/ui/select";
 import { Form } from "@/components/ui/form";
@@ -13,11 +12,10 @@ import {
   SearchFormValidationType,
 } from "@/lib/validation";
 import SubmitButton from "./SubmitButton";
-import { GroupSelectOption, SelectOption } from "@/lib/options";
+import { SelectOption } from "@/lib/options";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { fetchGroup, fetchOffice } from "@/lib/api";
+import { useDataStore } from "@/store/useDataStore";
 
 const SearchForm = ({
   onSubmitData,
@@ -28,8 +26,7 @@ const SearchForm = ({
   isLoading: boolean;
   internStatus: string;
 }) => {
-  const [officeOptions, setOfficeOptions] = useState<SelectOption[]>([]);
-  const [groupOptions, setGroupOptions] = useState<GroupSelectOption[]>([]);
+  const { office, group } = useDataStore();
   const [filteredGroup, setFilteredGroup] = useState<SelectOption[]>([]);
 
   const form = useForm<SearchFormValidationType>({
@@ -41,35 +38,11 @@ const SearchForm = ({
     },
   });
 
-  const office = form.watch("office");
-
-  const { data: officeResponse, isSuccess: isSuccess1 } = useQuery({
-    queryKey: ["office"],
-    queryFn: () => fetchOffice(),
-  });
-
-  const { data: groupResponse, isSuccess: isSuccess2 } = useQuery({
-    queryKey: ["group"],
-    queryFn: () => fetchGroup(),
-  });
+  const officeField = form.watch("office");
 
   const onSubmit = async (values: SearchFormValidationType) => {
     onSubmitData(values);
   };
-
-  useEffect(() => {
-    if (isSuccess1 && officeResponse?.results?.office) {
-      const { office } = officeResponse?.results;
-      setOfficeOptions(office);
-    }
-  }, [isSuccess1, officeResponse]);
-
-  useEffect(() => {
-    if (isSuccess2 && groupResponse?.results?.group) {
-      const { group } = groupResponse?.results;
-      setGroupOptions(group);
-    }
-  }, [isSuccess2, groupResponse]);
 
   useEffect(() => {
     if (internStatus === "1") {
@@ -79,12 +52,10 @@ const SearchForm = ({
   }, [internStatus]);
 
   useEffect(() => {
-    const filter = groupOptions.filter(
-      (group) => group.officeId === Number(office)
-    );
+    const filter = group.filter((g) => g.officeId === Number(officeField));
     form.setValue("group", "");
     setFilteredGroup(filter);
-  }, [office]);
+  }, [officeField]);
 
   return (
     <Form {...form}>
@@ -147,10 +118,10 @@ const SearchForm = ({
               width="w-[240px]"
               showClearBtn
             >
-              {officeOptions.map((office) => (
-                <SelectItem key={office.id} value={String(office.id)}>
+              {office.map((o) => (
+                <SelectItem key={o.id} value={String(o.id)}>
                   <div className="flex cursor-pointer items-center gap-2">
-                    <p>{office.name}</p>
+                    <p>{o.name}</p>
                   </div>
                 </SelectItem>
               ))}
