@@ -23,7 +23,6 @@ import SubmitButton from "./SubmitButton";
 import CustomFormField, { FormFieldType } from "./CustomFormField";
 import { ScrollArea } from "./ui/scroll-area";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { showError } from "@/lib/swal";
 import { editIntern, fetchStatus } from "@/lib/api";
 import { toast } from "sonner";
 import { RefreshCcw } from "lucide-react";
@@ -60,7 +59,7 @@ export function EditDialog({ intern }: { intern: InternDataType }) {
       });
     },
     onError: () => {
-      showError("ไม่สามารถแก้ไขข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+      toast.error("ไม่สามารถแก้ไขข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
     },
   });
 

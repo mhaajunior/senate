@@ -19,7 +19,8 @@ interface Props<T extends FieldValues> {
   statusOptions: SelectOption[];
   loading?: boolean;
   fieldName: keyof T & string;
-  label: string;
+  label?: string;
+  width?: string;
   submitFnc?: (val: string, form: UseFormReturn<T>) => void;
 }
 
@@ -29,6 +30,7 @@ function StatusSelection<T extends FieldValues>({
   loading = false,
   fieldName,
   label,
+  width,
   submitFnc,
 }: Props<T>) {
   return (
@@ -41,7 +43,7 @@ function StatusSelection<T extends FieldValues>({
             name={fieldName}
             label={label}
             placeholder="เลือกสถานะ"
-            width="w-[240px]"
+            width={width || "w-full"}
             loading={loading}
             submitBtn={!!submitFnc}
             submitFnc={(val) => {

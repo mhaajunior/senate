@@ -7,12 +7,14 @@ const TableSelection = ({
   color,
   active,
   count,
+  loading = false,
   ...rest
 }: {
   label: string;
   color?: string;
   active: boolean;
   count?: number;
+  loading?: boolean;
   [rest: string]: any;
 }) => {
   return (
@@ -27,9 +29,11 @@ const TableSelection = ({
           {...rest}
         >
           <p>{label}</p>
-          <div className="absolute right-0 top-0 p-1 bg-foreground rounded-xl text-xs">
-            {count || 0}
-          </div>
+          {!loading && (
+            <div className="absolute right-0 top-0 p-1 bg-foreground rounded-xl text-xs">
+              {count || 0}
+            </div>
+          )}
         </div>
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>

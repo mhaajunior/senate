@@ -9,6 +9,12 @@ export const InternStatusValidation = z.object({
 
 export type InternStatusValidationType = z.infer<typeof InternStatusValidation>;
 
+export const StatusValidation = z.object({
+  statusId: z.string(),
+});
+
+export type StatusValidationType = z.infer<typeof StatusValidation>;
+
 export const SearchFormValidation = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),

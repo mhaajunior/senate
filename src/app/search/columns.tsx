@@ -148,13 +148,13 @@ export const columns: ColumnDef<InternDataType>[] = [
       return <EditDialog intern={intern} />;
     },
   },
-  // {
-  //   accessorKey: "status",
-  //   header: "สถานะ",
-  //   cell: ({ row }) => {
-  //     const intern = row.original;
+  {
+    accessorKey: "status",
+    header: "สถานะ",
+    cell: ({ row }) => {
+      const intern = row.original;
 
-  //     return <StatusColumn defaultVal={intern.statusId} />;
-  //   },
-  // },
+      return <StatusColumn intern={intern} />;
+    },
+  },
 ];

@@ -5,7 +5,7 @@ import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { fetchInterns, fetchStatus } from "@/lib/api";
+import { fetchStatus } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader } from "@/components/Loader";
 import { PaginationControlled } from "@/components/PaginationControlled";
@@ -20,21 +20,17 @@ import { internStatusOptions, StatusSelectOption } from "@/lib/options";
 import TableSelection from "@/components/TableSelection";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form } from "@/components/ui/form";
-import CustomFormField, { FormFieldType } from "@/components/CustomFormField";
-import { SelectItem } from "@/components/ui/select";
 import StatusSelection from "@/components/StatusSelection";
-
-type FilterOptions = InternStatusValidationType & SearchFormValidationType;
+import { useInterns } from "@/hooks/useInterns";
+import { useInternFilter } from "@/store/useInternFilter";
 
 const page = () => {
-  const [page, setPage] = useState(1);
+  const { page, setPage, pageSize, status, setStatus, options, setOptions } =
+    useInternFilter();
+
   const [requestStatus, setRequestStatus] = useState<StatusSelectOption[]>([]);
   const [verifyStatus, setVerifyStatus] = useState<StatusSelectOption[]>([]);
   const [selection, setSelection] = useState<StatusSelectOption[]>([]);
-  const [options, setOptions] = useState<FilterOptions>({ internStatus: "1" });
-  const [status, setStatus] = useState(1);
-  const pageSize = 100;
 
   const form = useForm<InternStatusValidationType>({
     resolver: zodResolver(InternStatusValidation),
@@ -45,9 +41,11 @@ const page = () => {
 
   const internStatus = form.watch("internStatus");
 
-  const { data, isLoading, isError, isFetching, refetch } = useQuery({
-    queryKey: ["interns", page, options, status],
-    queryFn: () => fetchInterns({ page, pageSize, status, options }),
+  const { data, isLoading, isError, isFetching, refetch } = useInterns({
+    page,
+    pageSize,
+    status,
+    options,
   });
 
   const { data: statusResponse, isSuccess } = useQuery({
@@ -98,7 +96,7 @@ const page = () => {
   };
 
   const onChangeInternStatus = async (values: InternStatusValidationType) => {
-    setOptions((prev: SearchFormValidationType) => {
+    setOptions((prev) => {
       const { office, group, ...rest } = prev;
       const cleanedOptions = values.internStatus === "1" ? rest : prev;
       return {
@@ -118,40 +116,13 @@ const page = () => {
     <>
       <Title>ค้นหาเด็กฝึกงาน</Title>
 
-      {/* <Form {...form}>
-        <form className="flex flex-col gap-6">
-          <div className="flex gap-6 flex-wrap">
-            <CustomFormField
-              fieldType={FormFieldType.SELECT}
-              control={form.control}
-              name="internStatus"
-              label="สถานะหลัก"
-              placeholder="เลือกสถานะ"
-              width="w-[240px]"
-              loading={isLoading || isFetching}
-              submitBtn
-              submitFnc={(val) => {
-                form.setValue("internStatus", val);
-                form.handleSubmit(onChangeInternStatus)();
-              }}
-            >
-              {internStatusOptions.map((status) => (
-                <SelectItem key={status.id} value={String(status.id)}>
-                  <div className="flex cursor-pointer items-center gap-2">
-                    <p>{status.name}</p>
-                  </div>
-                </SelectItem>
-              ))}
-            </CustomFormField>
-          </div>
-        </form>
-      </Form> */}
       <StatusSelection
         form={form}
         statusOptions={internStatusOptions}
         loading={isLoading || isFetching}
         fieldName="internStatus"
         label="สถานะหลัก"
+        width="w-[240px]"
         submitFnc={(val, form) => {
           form.setValue("internStatus", val);
           form.handleSubmit(onChangeInternStatus)();
@@ -180,6 +151,7 @@ const page = () => {
               onClick={() => onChangeStatus(item.id)}
               active={item.id === status}
               count={data?.results.statusCounts[item.id] || 0}
+              loading={isLoading || isFetching}
             />
           ))}
         </div>
