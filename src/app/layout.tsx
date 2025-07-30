@@ -1,6 +1,10 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 import { Sarabun } from "next/font/google";
 import "./globals.css";
 import { MySidebar } from "@/components/MySidebar";
@@ -8,6 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { useEffect } from "react";
 import { useDataStore } from "@/store/useDataStore";
+import { useInternStatusCount } from "@/store/useInternStatusCount";
 
 const sarabun = Sarabun({
   subsets: ["thai"],

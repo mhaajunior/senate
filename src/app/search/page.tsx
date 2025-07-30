@@ -23,11 +23,15 @@ import { useInterns } from "@/hooks/useInterns";
 import { useInternFilter } from "@/store/useInternFilter";
 import { useDataStore } from "@/store/useDataStore";
 import { cn } from "@/lib/utils";
+import { useInternStatusCount } from "@/store/useInternStatusCount";
 
 const page = () => {
-  const { requestStatus, parentVerifyStatus } = useDataStore();
+  const { requestStatus, parentVerifyStatus, internStatusCount } =
+    useDataStore();
+  const { isLoading: isCountLoading } = useInternStatusCount();
   const { page, setPage, pageSize, status, setStatus, options, setOptions } =
     useInternFilter();
+
   const [selection, setSelection] = useState<StatusSelectOption[]>([]);
   const [tableHeight, setTableHeight] = useState(200);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -96,8 +100,10 @@ const page = () => {
     });
     if (values.internStatus === "1") {
       setSelection(requestStatus);
+      setStatus(requestStatus[0].id);
     } else {
       setSelection(parentVerifyStatus);
+      setStatus(parentVerifyStatus[0].id);
     }
     refetch();
   };
@@ -140,8 +146,8 @@ const page = () => {
               label={item.name}
               onClick={() => onChangeStatus(item.id)}
               active={item.id === status}
-              count={data?.results.statusCounts[item.id] || 0}
-              loading={isLoading || isFetching}
+              count={internStatusCount[item.id] || 0}
+              loading={isCountLoading}
             />
           ))}
         </div>
@@ -157,7 +163,11 @@ const page = () => {
           </div>
         ) : (
           <div ref={tableRef}>
-            <DataTable columns={columns} data={data?.results.data || []} />
+            <DataTable
+              columns={columns}
+              data={data?.results.data || []}
+              internStatus={internStatus}
+            />
           </div>
         )}
       </div>

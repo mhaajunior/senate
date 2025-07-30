@@ -5,7 +5,11 @@ import {
   InternValidation,
   InternValidationType,
   StatusValidation,
+  OnVerifyInternValidation,
+  VerifyInternValidationType,
+  VerifyInternValidation,
 } from "@/lib/validation";
+import { VERIFYSTATUS } from "@/lib/options";
 
 export async function POST(req: NextRequest) {
   try {
@@ -59,6 +63,7 @@ export async function POST(req: NextRequest) {
       results: { count: interns.length },
     });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "เกิดข้อผิดพลาดในการบันทึกข้อมูล" },
       { status: 500 }
@@ -84,7 +89,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * pageSize;
     const take = pageSize;
 
-    const where: any = {};
+    const where: any = { statusId };
 
     if (firstName) {
       where.firstName = { contains: firstName };
@@ -110,46 +115,32 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const whereWithStatus = { ...where, statusId };
-
-    if (internStatus === 1) {
-      const [data, total, groupedCount] = await Promise.all([
-        prisma.intern.findMany({
-          skip,
-          take,
-          where: whereWithStatus,
-          orderBy: [{ sendDate: "asc" }, { updatedAt: "desc" }],
-          include: { status: true },
-        }),
-        prisma.intern.count({ where: whereWithStatus }),
-        prisma.intern.groupBy({
-          by: ["statusId"],
-          where,
-          _count: { _all: true },
-        }),
-      ]);
-
-      const statusCounts = groupedCount.reduce((acc, curr) => {
-        acc[curr.statusId] = curr._count._all;
-        return acc;
-      }, {} as Record<string, number>);
-
-      return NextResponse.json({
-        success: true,
-        results: { data, total, statusCounts },
-      });
-    } else {
-      // TODO: หาจากตารางที่ verify แล้ว
-      return NextResponse.json({
-        success: true,
-        results: {
-          data: [],
-          total: 0,
-          statusCounts: {},
+    const [data, total] = await Promise.all([
+      prisma.intern.findMany({
+        skip,
+        take,
+        where,
+        orderBy: [{ sendDate: "asc" }, { updatedAt: "desc" }],
+        include: {
+          status: true,
+          office: true,
+          group: true,
+          updatedBy: {
+            select: {
+              username: true,
+            },
+          },
         },
-      });
-    }
+      }),
+      prisma.intern.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      success: true,
+      results: { data, total },
+    });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "ไม่สามารถดึงข้อมูลเด็กฝึกงานได้" },
       { status: 500 }
@@ -160,14 +151,18 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const intern: InternValidationType = body.intern;
+    const intern: VerifyInternValidationType = body.intern;
     const data = {
       ...intern,
       startDate: new Date(intern.startDate),
       endDate: new Date(intern.endDate),
     };
 
-    const valid = InternValidation.safeParse(data);
+    const verify = VERIFYSTATUS.includes(Number(intern.statusId));
+    const valid = verify
+      ? VerifyInternValidation.safeParse(data)
+      : InternValidation.safeParse(data);
+
     const found = prisma.intern.findFirst({
       where: { id: intern.id },
     });
@@ -178,7 +173,15 @@ export async function PUT(req: NextRequest) {
 
     const updatedIntern = await prisma.intern.update({
       where: { id: intern.id },
-      data: { ...data, statusId: Number(intern.statusId) },
+      data: {
+        ...data,
+        statusId: Number(intern.statusId),
+        isEdited: true,
+        updatedById: 1,
+        officeId: verify ? Number(data.officeId) : null,
+        groupId: verify ? Number(data.groupId) : null,
+        isVerify: verify,
+      },
     });
 
     return NextResponse.json({
@@ -188,6 +191,7 @@ export async function PUT(req: NextRequest) {
       },
     });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "ไม่สามารถแก้ไขข้อมูลเด็กฝึกงานได้" },
       { status: 500 }
@@ -198,29 +202,63 @@ export async function PUT(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json();
-    const { id, statusId } = body;
+    console.log("body ", body);
+    const { id, statusId, verifyIntern } = body;
 
-    const valid = StatusValidation.safeParse({ statusId });
+    const validStatus = StatusValidation.safeParse({ statusId });
+
     const found = prisma.intern.findFirst({
       where: { id },
     });
 
-    if (!valid.success || !found) {
+    if (!validStatus.success || !found) {
       return NextResponse.json({ error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
+    }
+
+    const verify = VERIFYSTATUS.includes(Number(statusId));
+
+    if (statusId === "4" && !verifyIntern) {
+      return NextResponse.json({ error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
+    }
+
+    if (verifyIntern) {
+      const validVerifyIntern =
+        OnVerifyInternValidation.safeParse(verifyIntern);
+      if (!validVerifyIntern.success) {
+        return NextResponse.json(
+          { error: "ข้อมูลไม่ถูกต้อง" },
+          { status: 400 }
+        );
+      }
+    }
+
+    let updatedData: any = {
+      statusId: Number(statusId),
+      isEdited: true,
+      updatedById: 1,
+      isVerify: verify,
+    };
+    if (verify) {
+      if (statusId === "4") {
+        updatedData.officeId = Number(verifyIntern.officeId);
+        updatedData.groupId = Number(verifyIntern.groupId);
+      }
+    } else {
+      updatedData.officeId = null;
+      updatedData.groupId = null;
     }
 
     const updatedIntern = await prisma.intern.update({
       where: { id },
-      data: { statusId: Number(statusId) },
+      data: updatedData,
     });
 
     return NextResponse.json({
       success: true,
-      results: {
-        intern: updatedIntern,
-      },
+      results: { intern: updatedIntern },
     });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "ไม่สามารถแก้ไขข้อมูลเด็กฝึกงานได้" },
       { status: 500 }

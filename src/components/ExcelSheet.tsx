@@ -5,7 +5,7 @@ import { registerAllModules } from "handsontable/registry";
 import { useRef } from "react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { showWarning } from "@/lib/swal";
 import { uploadInternData } from "@/lib/api";
 import { Loader } from "./Loader";
@@ -16,6 +16,7 @@ import "handsontable/styles/ht-theme-main.css";
 registerAllModules();
 
 const ExcelSheet = () => {
+  const queryClient = useQueryClient();
   const hotRef = useRef<any>(null);
 
   const mutation = useMutation({
@@ -23,6 +24,9 @@ const ExcelSheet = () => {
     mutationFn: uploadInternData,
     onSuccess: (data) => {
       toast.success(`บันทึกข้อมูลสำเร็จ ${data.results.count} แถว`);
+      queryClient.invalidateQueries({
+        queryKey: ["internStatusCount"],
+      });
     },
     onError: () => {
       toast.error("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");

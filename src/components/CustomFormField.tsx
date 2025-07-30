@@ -108,39 +108,38 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
                 props.submitFnc!(val);
               }
             }}
-            value={String(field.value)}
+            value={field.value}
             disabled={props.disabled || props.loading}
           >
-            <div className="relative">
-              <FormControl>
-                <SelectTrigger
-                  className={cn(
-                    "relative shad-select-trigger group",
-                    props.width || "w-full"
-                  )}
-                >
-                  <SelectValue placeholder={props.placeholder} />
-                </SelectTrigger>
-              </FormControl>
-              {field.value && props.showClearBtn && (
-                <div className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 bg-white rounded-md dark:bg-gray-700 dark:border-black p-1">
-                  <X
-                    size={16}
-                    className="cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      field.onChange("");
-                    }}
+            <FormControl>
+              <SelectTrigger
+                className={cn(
+                  "relative shad-select-trigger group",
+                  props.width || "w-full"
+                )}
+              >
+                <SelectValue placeholder={props.placeholder} />
+                {field.value && props.showClearBtn && (
+                  <div className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 bg-white rounded-md dark:bg-gray-700 dark:border-black p-1">
+                    <X
+                      size={16}
+                      className="cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        field.onChange("");
+                      }}
+                    />
+                  </div>
+                )}
+                {props.loading && (
+                  <Loader
+                    size="sm"
+                    className="absolute right-8 top-1/2 -translate-y-1/2 opacity-75"
                   />
-                </div>
-              )}
-              {props.loading && (
-                <Loader
-                  size="sm"
-                  className="absolute right-8 top-1/2 -translate-y-1/2 opacity-75"
-                />
-              )}
-            </div>
+                )}
+              </SelectTrigger>
+            </FormControl>
+
             <SelectContent className="shad-select-content">
               {props.children}
             </SelectContent>

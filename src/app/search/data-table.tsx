@@ -3,6 +3,7 @@
 import {
   ColumnDef,
   SortingState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
@@ -17,19 +18,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  internStatus: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  internStatus,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    sendDate: true,
+    approveDate: false,
+    office: false,
+    group: false,
+  });
 
   const table = useReactTable({
     data,
@@ -37,10 +46,30 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
+      columnVisibility,
     },
   });
+
+  useEffect(() => {
+    if (internStatus === "1") {
+      setColumnVisibility({
+        sendDate: true,
+        approveDate: false,
+        office: false,
+        group: false,
+      });
+    } else {
+      setColumnVisibility({
+        sendDate: false,
+        approveDate: true,
+        office: true,
+        group: true,
+      });
+    }
+  }, [internStatus]);
 
   return (
     <div className="rounded-md border">

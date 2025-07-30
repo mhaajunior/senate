@@ -15,7 +15,7 @@ datasource db {
 }
 
 model Intern {
-  id           Int           @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   iden         String
   prefix       String
   firstName    String
@@ -30,22 +30,17 @@ model Intern {
   preferredJob String
   sendDate     DateTime
   statusId     Int
-  status       Status        @relation(fields: [statusId], references: [id])
-  verifyIntern VerifyIntern?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-}
-
-model VerifyIntern {
-  id        Int      @id @default(autoincrement())
-  internId  Int      @unique
-  intern    Intern   @relation(fields: [internId], references: [id])
-  officeId  Int
-  office    Office   @relation(fields: [officeId], references: [id])
-  groupId   Int
-  group     Group    @relation(fields: [groupId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status       Status   @relation(fields: [statusId], references: [id])
+  isEdited     Boolean  @default(false)
+  isVerify     Boolean  @default(false)
+  officeId     Int?
+  office       Office?  @relation(fields: [officeId], references: [id])
+  groupId      Int?
+  group        Group?   @relation(fields: [groupId], references: [id])
+  updatedById  Int?
+  updatedBy    User?    @relation(fields: [updatedById], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Status {
@@ -59,16 +54,23 @@ model Status {
 }
 
 model Office {
-  id           Int            @id @default(autoincrement())
-  name         String
-  verifyIntern VerifyIntern[]
-  group        Group[]
+  id     Int      @id @default(autoincrement())
+  name   String
+  intern Intern[]
+  group  Group[]
 }
 
 model Group {
-  id           Int            @id @default(autoincrement())
-  name         String
-  verifyIntern VerifyIntern[]
-  officeId     Int
-  office       Office         @relation(fields: [officeId], references: [id])
+  id       Int      @id @default(autoincrement())
+  name     String
+  intern   Intern[]
+  officeId Int
+  office   Office   @relation(fields: [officeId], references: [id])
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  username       String   @unique
+  password       String
+  updatedInterns Intern[]
 }

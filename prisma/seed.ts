@@ -1,7 +1,9 @@
 import { PrismaClient } from "@/generated/prisma";
+import bcrypt from "bcrypt";
 import { STATUS } from "./data/status";
 import { OFFICE } from "./data/office";
 import { GROUP } from "./data/group";
+import { USER } from "./data/user";
 
 const prisma = new PrismaClient();
 
@@ -41,6 +43,24 @@ async function main() {
       where: { id: g.id },
       update: { name: g.name, officeId: g.officeId },
       create: { id: g.id, name: g.name, officeId: g.officeId },
+    });
+  }
+
+  // Upsert USER
+  for (const u of USER) {
+    const hashedPassword = await bcrypt.hash(u.password, 10);
+
+    await prisma.user.upsert({
+      where: { id: u.id },
+      update: {
+        username: u.username,
+        password: hashedPassword,
+      },
+      create: {
+        id: u.id,
+        username: u.username,
+        password: hashedPassword,
+      },
     });
   }
 }

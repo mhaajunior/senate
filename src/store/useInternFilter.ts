@@ -1,4 +1,3 @@
-// stores/useInternFilter.ts
 import { create } from "zustand";
 import {
   InternStatusValidationType,

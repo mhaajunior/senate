@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { StatusSelectOption } from "./options";
+import { GroupSelectOption, SelectOption, StatusSelectOption } from "./options";
 
 const thaiPhoneRegex = /^(06|08|09)\d{8}$/;
 
@@ -27,56 +27,96 @@ export const SearchFormValidation = z.object({
 
 export type SearchFormValidationType = z.infer<typeof SearchFormValidation>;
 
-export const InternValidation = z.object({
-  id: z.number(),
-  iden: z
-    .string({ message: "ข้อมูลไม่ถูกต้อง" })
-    .min(1, { message: "กรุณากรอกข้อมูล" })
-    .length(13, { message: "ข้อมูลไม่ถูกต้อง" }),
-  prefix: z
-    .string({ message: "ข้อมูลไม่ถูกต้อง" })
-    .min(1, { message: "กรุณากรอกข้อมูล" }),
-  firstName: z
-    .string({ message: "ข้อมูลไม่ถูกต้อง" })
-    .min(1, { message: "กรุณากรอกข้อมูล" }),
-  lastName: z
-    .string({ message: "ข้อมูลไม่ถูกต้อง" })
-    .min(1, { message: "กรุณากรอกข้อมูล" }),
-  academy: z
-    .string({ message: "ข้อมูลไม่ถูกต้อง" })
-    .min(1, { message: "กรุณากรอกข้อมูล" }),
-  faculty: z
-    .string({ message: "ข้อมูลไม่ถูกต้อง" })
-    .min(1, { message: "กรุณากรอกข้อมูล" }),
-  branch: z
-    .string({ message: "ข้อมูลไม่ถูกต้อง" })
-    .min(1, { message: "กรุณากรอกข้อมูล" }),
-  phone: z
-    .string({ message: "ข้อมูลไม่ถูกต้อง" })
-    .min(1, { message: "กรุณากรอกข้อมูล" })
-    .regex(thaiPhoneRegex, {
-      message: "ข้อมูลไม่ถูกต้อง",
-    }),
-  email: z
-    .email({ message: "ข้อมูลไม่ถูกต้อง" })
-    .min(1, { message: "กรุณากรอกข้อมูล" }),
-  startDate: z
-    .date({ message: "ข้อมูลไม่ถูกต้อง" })
-    .min(1, { message: "กรุณากรอกข้อมูล" }),
-  endDate: z
-    .date({ message: "ข้อมูลไม่ถูกต้อง" })
-    .min(1, { message: "กรุณากรอกข้อมูล" }),
-  preferredJob: z
-    .string({ message: "ข้อมูลไม่ถูกต้อง" })
-    .min(1, { message: "กรุณากรอกข้อมูล" }),
-  statusId: z.string(),
-});
+export const InternValidation = z
+  .object({
+    id: z.number(),
+    iden: z
+      .string({ message: "ข้อมูลไม่ถูกต้อง" })
+      .min(1, { message: "กรุณากรอกข้อมูล" })
+      .length(13, { message: "ข้อมูลไม่ถูกต้อง" }),
+    prefix: z
+      .string({ message: "ข้อมูลไม่ถูกต้อง" })
+      .min(1, { message: "กรุณากรอกข้อมูล" }),
+    firstName: z
+      .string({ message: "ข้อมูลไม่ถูกต้อง" })
+      .min(1, { message: "กรุณากรอกข้อมูล" }),
+    lastName: z
+      .string({ message: "ข้อมูลไม่ถูกต้อง" })
+      .min(1, { message: "กรุณากรอกข้อมูล" }),
+    academy: z
+      .string({ message: "ข้อมูลไม่ถูกต้อง" })
+      .min(1, { message: "กรุณากรอกข้อมูล" }),
+    faculty: z
+      .string({ message: "ข้อมูลไม่ถูกต้อง" })
+      .min(1, { message: "กรุณากรอกข้อมูล" }),
+    branch: z
+      .string({ message: "ข้อมูลไม่ถูกต้อง" })
+      .min(1, { message: "กรุณากรอกข้อมูล" }),
+    phone: z
+      .string({ message: "ข้อมูลไม่ถูกต้อง" })
+      .min(1, { message: "กรุณากรอกข้อมูล" })
+      .regex(thaiPhoneRegex, {
+        message: "ข้อมูลไม่ถูกต้อง",
+      }),
+    email: z
+      .email({ message: "ข้อมูลไม่ถูกต้อง" })
+      .min(1, { message: "กรุณากรอกข้อมูล" }),
+    startDate: z
+      .date({ message: "ข้อมูลไม่ถูกต้อง" })
+      .min(1, { message: "กรุณากรอกข้อมูล" }),
+    endDate: z
+      .date({ message: "ข้อมูลไม่ถูกต้อง" })
+      .min(1, { message: "กรุณากรอกข้อมูล" }),
+    preferredJob: z
+      .string({ message: "ข้อมูลไม่ถูกต้อง" })
+      .min(1, { message: "กรุณากรอกข้อมูล" }),
+    statusId: z.string(),
+    officeId: z.string().optional(),
+    groupId: z.string().optional(),
+  })
+  .refine((data) => data.statusId !== "4" || !!data.officeId, {
+    message: "กรุณากรอกข้อมูล",
+    path: ["officeId"],
+  })
+  .refine((data) => data.statusId !== "4" || !!data.groupId, {
+    message: "กรุณากรอกข้อมูล",
+    path: ["groupId"],
+  });
 
 export type InternValidationType = z.infer<typeof InternValidation>;
 
 export type InternDataType = InternValidationType & {
   status: StatusSelectOption;
   sendDate: Date;
-  updatedAt: Date;
+  isEdited: boolean;
   createdAt: Date;
+  updatedAt: Date;
+  updatedBy: {
+    username: string;
+  };
+  officeId?: number;
+  office?: SelectOption;
+  groupId?: number;
+  group?: GroupSelectOption;
 };
+
+export const OnVerifyInternValidation = z.object({
+  officeId: z
+    .string({ message: "ข้อมูลไม่ถูกต้อง" })
+    .min(1, { message: "กรุณากรอกข้อมูล" }),
+  groupId: z
+    .string({ message: "ข้อมูลไม่ถูกต้อง" })
+    .min(1, { message: "กรุณากรอกข้อมูล" }),
+});
+
+export type OnVerifyInternValidationType = z.infer<
+  typeof OnVerifyInternValidation
+>;
+
+export const VerifyInternValidation = z.intersection(
+  InternValidation,
+  OnVerifyInternValidation
+);
+
+export type VerifyInternValidationType = InternValidationType &
+  OnVerifyInternValidationType;

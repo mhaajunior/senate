@@ -39,9 +39,27 @@ export const columns: ColumnDef<InternDataType>[] = [
     accessorFn: (row) => formatThaiDateTime(row.sendDate, true),
   },
   {
-    accessorKey: "iden",
-    header: "ID Card",
-    accessorFn: (row) => isNull(row.iden),
+    accessorKey: "approveDate",
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted();
+      return (
+        <Button
+          variant="ghost"
+          className="font-bold"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          วันที่ตอบรับ
+          {isSorted === "asc" ? (
+            <ArrowUp className="ml-2 h-4 w-4" />
+          ) : isSorted === "desc" ? (
+            <ArrowDown className="ml-2 h-4 w-4" />
+          ) : (
+            <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />
+          )}
+        </Button>
+      );
+    },
+    accessorFn: (row) => formatThaiDateTime(row.createdAt, true),
   },
   {
     accessorKey: "prefix",
@@ -62,26 +80,6 @@ export const columns: ColumnDef<InternDataType>[] = [
     accessorKey: "academy",
     header: "สถานศึกษา",
     accessorFn: (row) => isNull(row.academy),
-  },
-  {
-    accessorKey: "faculty",
-    header: "คณะ",
-    accessorFn: (row) => isNull(row.faculty),
-  },
-  {
-    accessorKey: "branch",
-    header: "สาขา",
-    accessorFn: (row) => isNull(row.branch),
-  },
-  {
-    accessorKey: "phone",
-    header: "หมายเลขโทรศัพท์",
-    accessorFn: (row) => isNull(row.phone),
-  },
-  {
-    accessorKey: "email",
-    header: "อีเมล",
-    accessorFn: (row) => isNull(row.email),
   },
   {
     accessorKey: "startDate",
@@ -130,18 +128,18 @@ export const columns: ColumnDef<InternDataType>[] = [
     accessorFn: (row) => formatThaiDateTime(row.endDate),
   },
   {
-    accessorKey: "preferredJob",
-    header: "สำนัก/กลุ่มงาน/ลักษณะงาน ที่สนใจฝึกงาน",
-    accessorFn: (row) => isNull(row.preferredJob),
+    accessorKey: "office",
+    header: "สำนัก",
+    accessorFn: (row) => isNull(row.office?.name),
   },
   {
-    accessorKey: "updatedAt",
-    header: "แก้ไขล่าสุด",
-    accessorFn: (row) => formatThaiDateTime(row.updatedAt, true),
+    accessorKey: "group",
+    header: "กลุ่มงาน",
+    accessorFn: (row) => isNull(row.group?.name),
   },
   {
     id: "actions",
-    header: "แก้ไข",
+    header: "ดู/แก้ไข",
     cell: ({ row }) => {
       const intern = row.original;
 

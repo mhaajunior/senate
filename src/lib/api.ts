@@ -42,13 +42,16 @@ export const editIntern = async (
 export const updateInternStatus = async ({
   statusId,
   id,
+  verifyIntern,
 }: {
   statusId: string;
   id: number;
+  verifyIntern?: { officeId: string; groupId: string };
 }): Promise<BaseResponse> => {
   const res = await axios.patch("/api/intern", {
     id,
     statusId,
+    verifyIntern,
   });
   return res.data;
 };
@@ -68,6 +71,11 @@ export const fetchGroup = async (): Promise<BaseResponse> => {
   return res.data;
 };
 
+export const fetchInternStatusCount = async (): Promise<InternCounts> => {
+  const res = await axios.get("/api/internStatusCount");
+  return res.data;
+};
+
 interface FilterOptions {
   firstName?: string;
   latsName?: string;
@@ -80,7 +88,12 @@ interface InternsResponse extends BaseResponse {
   results: {
     data: InternDataType[];
     total: number;
-    statusCounts: Record<string, number>;
+  };
+}
+
+interface InternCounts extends BaseResponse {
+  results: {
+    internCounts: Record<string, number>;
   };
 }
 
