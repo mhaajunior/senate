@@ -16,9 +16,11 @@ import MyDatepicker from "./MyDatepicker";
 import { X } from "lucide-react";
 import { Loader } from "./Loader";
 import { cn } from "@/lib/utils";
+import PasswordInput from "./PasswordInput";
 
 export enum FormFieldType {
   INPUT = "input",
+  PASSWORD = "password",
   TEXTAREA = "textarea",
   PHONE_INPUT = "phoneInput",
   CHECKBOX = "checkbox",
@@ -69,6 +71,16 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
             />
           </FormControl>
         </div>
+      );
+    case FormFieldType.PASSWORD:
+      return (
+        <FormControl>
+          <PasswordInput
+            placeholder={props.placeholder}
+            {...field}
+            className={cn("shad-input border-0", props.width || "w-full")}
+          />
+        </FormControl>
       );
     case FormFieldType.TEXTAREA:
       return (

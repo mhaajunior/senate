@@ -120,3 +120,14 @@ export const VerifyInternValidation = z.intersection(
 
 export type VerifyInternValidationType = InternValidationType &
   OnVerifyInternValidationType;
+
+export const LoginValidation = z.object({
+  username: z
+    .string({ message: "ข้อมูลไม่ถูกต้อง" })
+    .min(1, { message: "กรุณากรอกข้อมูล" }),
+  password: z
+    .string({ message: "ข้อมูลไม่ถูกต้อง" })
+    .min(1, { message: "กรุณากรอกข้อมูล" }),
+});
+
+export type LoginValidationType = z.infer<typeof LoginValidation>;

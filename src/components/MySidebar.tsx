@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import {
@@ -13,6 +14,8 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Navbar from "./Navbar";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export function MySidebar({ children }: { children: React.ReactNode }) {
   const links = [
@@ -42,8 +45,13 @@ export function MySidebar({ children }: { children: React.ReactNode }) {
       icon: <Import className="h-5 w-5 flex-shrink-0" />,
     },
   ];
+
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
+
+  if (!session) return null;
+
   return (
     <div
       className={cn(
@@ -53,17 +61,50 @@ export function MySidebar({ children }: { children: React.ReactNode }) {
     >
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10">
-          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            {open ? <Logo /> : <LogoIcon />}
-            <div className="mt-8 flex flex-col gap-2">
-              {links.map((link, idx) => (
-                <SidebarLink
-                  key={idx}
-                  link={link}
-                  isActive={pathname === link.href}
-                />
-              ))}
+          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden justify-between">
+            <div>
+              {open ? <Logo /> : <LogoIcon />}
+              <div className="mt-8 flex flex-col gap-2">
+                {links.map((link, idx) => (
+                  <SidebarLink
+                    key={idx}
+                    link={link}
+                    isActive={pathname === link.href}
+                  />
+                ))}
+              </div>
             </div>
+          </div>
+          <div>
+            {open ? (
+              <div className="flex gap-4 items-center">
+                <Avatar>
+                  <AvatarImage src={session.user?.image ?? undefined} />
+                  <AvatarFallback>
+                    {session.user?.name
+                      ? session.user?.name.charAt(0).toUpperCase()
+                      : "PW"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-col">
+                  <div className="text-xs font-medium">
+                    {session.user?.name}
+                  </div>
+                  <p className="text-xs font-extralight text-muted-foreground">
+                    {session.user?.email}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <Avatar>
+                <AvatarImage src={session.user?.image ?? undefined} />
+                <AvatarFallback>
+                  {session.user?.name
+                    ? session.user?.name.charAt(0).toUpperCase()
+                    : "PW"}
+                </AvatarFallback>
+              </Avatar>
+            )}
           </div>
         </SidebarBody>
       </Sidebar>
