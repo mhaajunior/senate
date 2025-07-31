@@ -20,7 +20,7 @@ const PasswordInput = ({
           {...props}
         />
         <div
-          className="absolute top-2.5 right-4 text-2xl text-gray-500 cursor-pointer"
+          className="absolute top-1/2 -translate-y-1/2 right-4 text-2xl text-gray-500 cursor-pointer"
           onClick={() => setIsVisible((prev) => !prev)}
         >
           {isVisible ? <Eye size={18} /> : <EyeOff size={18} />}

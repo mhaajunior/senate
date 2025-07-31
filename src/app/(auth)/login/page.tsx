@@ -11,13 +11,20 @@ import { useMutation } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+const images = [
+  "/background/bg1.jpg",
+  "/background/bg2.jpg",
+  "/background/bg3.jpg",
+];
 
 const Login = () => {
   const { status } = useSession();
   const router = useRouter();
+  const [bgImage, setBgImage] = useState("/background/bg1.jpg");
 
   const form = useForm<LoginValidationType>({
     resolver: zodResolver(LoginValidation),
@@ -26,6 +33,11 @@ const Login = () => {
       password: "",
     },
   });
+
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * images.length);
+    setBgImage(images[randomIndex]);
+  }, []);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -63,7 +75,7 @@ const Login = () => {
   return (
     <section className="relative h-screen w-screen">
       <Image
-        src="/senate.jpg"
+        src={bgImage}
         alt="background"
         fill
         priority

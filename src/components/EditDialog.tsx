@@ -35,7 +35,7 @@ import { SelectOption } from "@/lib/options";
 
 export function EditDialog({ intern }: { intern: InternDataType }) {
   const queryClient = useQueryClient();
-  const { status, office, group } = useDataStore();
+  const { status, office, group, verifyStatus } = useDataStore();
   const isVerify = intern.office && intern.group;
 
   const [open, setOpen] = useState(false);
@@ -57,8 +57,8 @@ export function EditDialog({ intern }: { intern: InternDataType }) {
       startDate: new Date(intern.startDate),
       endDate: new Date(intern.endDate),
       statusId: String(intern.statusId),
-      officeId: intern.officeId ? String(intern.officeId) : undefined,
-      groupId: intern.groupId ? String(intern.groupId) : undefined,
+      officeId: intern.officeId ? String(intern.officeId) : "",
+      groupId: intern.groupId ? String(intern.groupId) : "",
     },
   });
 
@@ -93,7 +93,8 @@ export function EditDialog({ intern }: { intern: InternDataType }) {
   }, [officeField]);
 
   const onSubmit = async (value: InternValidationType) => {
-    mutation.mutate(value);
+    const verifyStatusIds = verifyStatus.map((s) => s.id);
+    mutation.mutate({ intern: value, verifyStatusIds });
   };
 
   const onResetForm = () => {

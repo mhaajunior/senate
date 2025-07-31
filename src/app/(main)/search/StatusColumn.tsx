@@ -17,7 +17,7 @@ import { toast } from "sonner";
 
 const StatusColumn = ({ intern }: { intern: InternDataType }) => {
   const queryClient = useQueryClient();
-  const { status } = useDataStore();
+  const { status, verifyStatus } = useDataStore();
   const filteredStatus = status.filter((s) => {
     if (intern.status.type === 3) {
       return [1, 2, 3].includes(s.type);
@@ -76,7 +76,13 @@ const StatusColumn = ({ intern }: { intern: InternDataType }) => {
     statusData: StatusValidationType,
     verifyData?: OnVerifyInternValidationType
   ) => {
-    const data = { id: intern.id, ...statusData, verifyIntern: verifyData };
+    const verifyStatusIds = verifyStatus.map((s) => s.id);
+    const data = {
+      id: intern.id,
+      ...statusData,
+      verifyIntern: verifyData,
+      verifyStatusIds,
+    };
     mutation.mutate(data);
   };
 

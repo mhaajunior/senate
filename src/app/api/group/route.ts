@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { withAuth } from "@/lib/withAuth";
 
-export async function GET(req: NextRequest) {
+async function handler(req: NextRequest) {
   try {
     const group = await prisma.group.findMany({
       orderBy: { id: "asc" },
@@ -18,3 +19,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withAuth({ GET: handler });

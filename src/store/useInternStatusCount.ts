@@ -8,7 +8,7 @@ export const useInternStatusCount = () => {
 
   const query = useQuery({
     queryKey: ["internStatusCount"],
-    queryFn: fetchInternStatusCount,
+    queryFn: () => fetchInternStatusCount(),
   });
 
   useEffect(() => {

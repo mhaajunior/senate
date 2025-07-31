@@ -3,15 +3,16 @@ import prisma from "@/lib/prisma";
 import { parse } from "date-fns";
 import {
   InternValidation,
-  InternValidationType,
   StatusValidation,
   OnVerifyInternValidation,
   VerifyInternValidationType,
   VerifyInternValidation,
 } from "@/lib/validation";
-import { VERIFYSTATUS } from "@/lib/options";
+import { withAuth } from "@/lib/withAuth";
+import { getToken } from "next-auth/jwt";
+import { groupVerifyStatus } from "../status/route";
 
-export async function POST(req: NextRequest) {
+async function postHandler(req: NextRequest) {
   try {
     const body = await req.json();
     const rows: string[][] = body.rows;
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
+async function getHandler(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const page = Number(searchParams.get("page") ?? "1");
@@ -108,10 +109,18 @@ export async function GET(req: NextRequest) {
     }
     if (internStatus === 2) {
       if (office) {
-        where.office = { contains: office };
+        where.officeId = Number(office);
       }
       if (group) {
-        where.group = { contains: group };
+        where.groupId = Number(group);
+      }
+
+      // จัดกลุ่ม verify status
+      const verifyStatusGroup = await groupVerifyStatus();
+
+      if (verifyStatusGroup[statusId]) {
+        const statusIdList = [statusId, ...verifyStatusGroup[statusId]];
+        where.statusId = { in: statusIdList };
       }
     }
 
@@ -148,17 +157,19 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function PUT(req: NextRequest) {
+async function putHandler(req: NextRequest) {
   try {
     const body = await req.json();
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const intern: VerifyInternValidationType = body.intern;
+    const verifyStatusIds: number[] = body.verifyStatusIds;
     const data = {
       ...intern,
       startDate: new Date(intern.startDate),
       endDate: new Date(intern.endDate),
     };
 
-    const verify = VERIFYSTATUS.includes(Number(intern.statusId));
+    const verify = verifyStatusIds.includes(Number(intern.statusId));
     const valid = verify
       ? VerifyInternValidation.safeParse(data)
       : InternValidation.safeParse(data);
@@ -177,7 +188,7 @@ export async function PUT(req: NextRequest) {
         ...data,
         statusId: Number(intern.statusId),
         isEdited: true,
-        updatedById: 1,
+        updatedById: token?.sub,
         officeId: verify ? Number(data.officeId) : null,
         groupId: verify ? Number(data.groupId) : null,
         isVerify: verify,
@@ -199,11 +210,11 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-export async function PATCH(req: NextRequest) {
+async function patchHandler(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log("body ", body);
-    const { id, statusId, verifyIntern } = body;
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const { id, statusId, verifyIntern, verifyStatusIds } = body;
 
     const validStatus = StatusValidation.safeParse({ statusId });
 
@@ -215,7 +226,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
     }
 
-    const verify = VERIFYSTATUS.includes(Number(statusId));
+    const verify = verifyStatusIds.includes(Number(statusId));
 
     if (statusId === "4" && !verifyIntern) {
       return NextResponse.json({ error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
@@ -235,7 +246,7 @@ export async function PATCH(req: NextRequest) {
     let updatedData: any = {
       statusId: Number(statusId),
       isEdited: true,
-      updatedById: 1,
+      updatedById: token?.sub,
       isVerify: verify,
     };
     if (verify) {
@@ -265,3 +276,8 @@ export async function PATCH(req: NextRequest) {
     );
   }
 }
+
+export const GET = withAuth({ GET: getHandler });
+export const POST = withAuth({ POST: postHandler });
+export const PUT = withAuth({ PUT: putHandler });
+export const PATCH = withAuth({ PATCH: patchHandler });

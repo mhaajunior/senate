@@ -12,6 +12,7 @@ interface DataStore {
   group: GroupSelectOption[];
   status: StatusSelectOption[];
   requestStatus: StatusSelectOption[];
+  verifyStatus: StatusSelectOption[];
   parentVerifyStatus: StatusSelectOption[];
   internStatusCount: Record<string, number>;
   fetchOffice: () => Promise<void>;
@@ -25,9 +26,9 @@ export const useDataStore = create<DataStore>((set) => ({
   group: [],
   status: [],
   requestStatus: [],
+  verifyStatus: [],
   parentVerifyStatus: [],
   internStatusCount: {},
-  verifyStatusCount: {},
   fetchOffice: async () => {
     const res = await fetchOffice();
     if (res.success) {
@@ -43,14 +44,13 @@ export const useDataStore = create<DataStore>((set) => ({
   fetchStatus: async () => {
     const res = await fetchStatus();
     if (res.success) {
-      const { status } = res.results;
+      const { status, requestStatus, verifyStatus } = res.results;
       set({ status });
-      const requestStatus = status.filter(
-        (s: StatusSelectOption) => s.type === 1 || s.type === 3
-      );
       set({ requestStatus });
-      const parentVerifyStatus = status.filter(
-        (s: StatusSelectOption) => (s.type === 2 || s.type === 3) && !s.parentId
+      set({ verifyStatus });
+
+      const parentVerifyStatus = verifyStatus.filter(
+        (s: StatusSelectOption) => !s.parentId
       );
       set({ parentVerifyStatus });
     }

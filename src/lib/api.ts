@@ -35,11 +35,16 @@ export const fetchInterns = async ({
   return res.data;
 };
 
-export const editIntern = async (
-  intern: InternValidationType
-): Promise<BaseResponse> => {
+export const editIntern = async ({
+  intern,
+  verifyStatusIds,
+}: {
+  intern: InternValidationType;
+  verifyStatusIds: number[];
+}): Promise<BaseResponse> => {
   const res = await axios.put("/api/intern", {
     intern,
+    verifyStatusIds,
   });
   return res.data;
 };
@@ -48,15 +53,18 @@ export const updateInternStatus = async ({
   statusId,
   id,
   verifyIntern,
+  verifyStatusIds,
 }: {
   statusId: string;
   id: number;
   verifyIntern?: { officeId: string; groupId: string };
+  verifyStatusIds: number[];
 }): Promise<BaseResponse> => {
   const res = await axios.patch("/api/intern", {
     id,
     statusId,
     verifyIntern,
+    verifyStatusIds,
   });
   return res.data;
 };
@@ -104,6 +112,8 @@ interface FilterOptions {
   academy?: string;
   startDate?: Date;
   endDate?: Date;
+  office?: string;
+  group?: string;
 }
 
 interface InternsResponse extends BaseResponse {

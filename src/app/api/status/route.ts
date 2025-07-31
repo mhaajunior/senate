@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { withAuth } from "@/lib/withAuth";
 
-export async function GET(req: NextRequest) {
+async function handler(req: NextRequest) {
   try {
     const status = await prisma.status.findMany({
       orderBy: { id: "asc" },
     });
 
+    const requestStatus = status.filter((s) => s.type === 1 || s.type === 3);
+    const verifyStatus = status.filter((s) => s.type === 2 || s.type === 3);
+
     return NextResponse.json({
       success: true,
-      results: { status },
+      results: { status, requestStatus, verifyStatus },
     });
   } catch (error) {
     return NextResponse.json(
@@ -18,3 +22,24 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const groupVerifyStatus = async () => {
+  const status = await prisma.status.findMany({
+    orderBy: { id: "asc" },
+  });
+
+  const verifyStatus = status.filter((s) => s.type === 2 || s.type === 3);
+  const groupVerifyStatus: Record<number, number[]> = {};
+  for (const s of verifyStatus) {
+    if (s.parentId) {
+      if (!groupVerifyStatus[s.parentId]) {
+        groupVerifyStatus[s.parentId] = [];
+      }
+      groupVerifyStatus[s.parentId].push(s.id);
+    }
+  }
+
+  return groupVerifyStatus;
+};
+
+export const GET = withAuth({ GET: handler });

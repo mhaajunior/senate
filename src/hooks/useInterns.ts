@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchInterns } from "@/lib/api";
+import { FilterOptions } from "@/store/useInternFilter";
 
 export function useInterns({
   page,
@@ -10,7 +11,7 @@ export function useInterns({
   page: number;
   pageSize: number;
   status: number;
-  options?: any;
+  options: FilterOptions;
 }) {
   return useQuery({
     queryKey: ["interns", page, options, status],
