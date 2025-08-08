@@ -112,7 +112,12 @@ export const MobileSidebar = ({
   const { open, setOpen } = useSidebar();
   return (
     <>
-      <div className={cn("md:hidden absolute top-5 left-5")} {...props}>
+      <div
+        className={cn(
+          "md:hidden absolute top-3 left-3 p-2 rounded-lg bg-neutral-100 dark:bg-neutral-800"
+        )}
+        {...props}
+      >
         <div className="z-20 w-full">
           <Menu className="cursor-pointer" onClick={() => setOpen(!open)} />
         </div>

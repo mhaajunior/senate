@@ -7,6 +7,7 @@ import {
   UserRound,
   UserRoundCheck,
   UserRoundCog,
+  UserRoundPlus,
   UserRoundX,
   UsersRound,
 } from "lucide-react";
@@ -17,11 +18,13 @@ import { Skeleton } from "../ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Pie } from "react-chartjs-2";
+import { toast } from "sonner";
 
 const nameMap: Record<string, string> = {
   TOTAL: "ผู้สมัครทั้งหมด",
   PENDING: "รอดำเนินการ",
   VERIFY: "ตอบรับแล้ว",
+  COMPLETE: "สิ้นสุดการฝึก",
   CANCEL: "ยกเลิก/ปฏิเสธ",
   OTHER: "อื่นๆ",
 };
@@ -31,19 +34,25 @@ const summary = [
     id: "TOTAL",
     title: nameMap["TOTAL"],
     icon: <UsersRound />,
-    color: "bg-blue-500/50",
-  },
-  {
-    id: "VERIFY",
-    title: nameMap["VERIFY"],
-    icon: <UserRoundCheck />,
-    color: "bg-green-500/50",
+    color: "bg-neutral-500/50",
   },
   {
     id: "PENDING",
     title: nameMap["PENDING"],
     icon: <UserRoundCog />,
     color: "bg-yellow-500/50",
+  },
+  {
+    id: "VERIFY",
+    title: nameMap["VERIFY"],
+    icon: <UserRoundPlus />,
+    color: "bg-blue-500/50",
+  },
+  {
+    id: "COMPLETE",
+    title: nameMap["COMPLETE"],
+    icon: <UserRoundCheck />,
+    color: "bg-green-500/50",
   },
   {
     id: "CANCEL",
@@ -60,13 +69,14 @@ const summary = [
 ];
 
 const Summary = () => {
-  const { isLoading, isFetching } = useInternStatusCount();
+  const { isLoading, isFetching, isError } = useInternStatusCount();
   const { overallStatusCount } = useDataStore();
 
   const [categoryCount, setCategoryCount] = useState<Record<string, number>>({
     TOTAL: 0,
     PENDING: 0,
     VERIFY: 0,
+    COMPLETE: 0,
     CANCEL: 0,
     OTHER: 0,
   });
@@ -80,16 +90,18 @@ const Summary = () => {
       TOTAL: 0,
       PENDING: 0,
       VERIFY: 0,
+      COMPLETE: 0,
       CANCEL: 0,
       OTHER: 0,
     };
     const tempStatusCount: Record<string, { name: string; count: number }[]> =
       {};
 
-    const { PENDING, VERIFY, CANCEL, OTHER } = STATUS_CATEGORY;
+    const { PENDING, VERIFY, COMPLETE, CANCEL, OTHER } = STATUS_CATEGORY;
     const categoryMap: Record<string, number[]> = {
       PENDING,
       VERIFY,
+      COMPLETE,
       CANCEL,
       OTHER,
     };
@@ -133,6 +145,7 @@ const Summary = () => {
             .map((item) => {
               const colorMap: Record<string, string> = {
                 "bg-green-500/50": "#10b981",
+                "bg-neutral-500/50": "#737373",
                 "bg-yellow-500/50": "#facc15",
                 "bg-red-500/50": "#ef4444",
                 "bg-purple-500/50": "#a855f7",
@@ -146,8 +159,14 @@ const Summary = () => {
     setPieChartData(pieChartData);
   }, [categoryCount]);
 
+  useEffect(() => {
+    if (isError) {
+      toast.error("โหลด Summary ไม่สำเร็จ");
+    }
+  }, [isError]);
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[70%_30%] gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-[60%_40%] lg:grid-cols-[70%_30%] gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {summary.map((item, index) => {
           const hasStatus = statusCount[item.id]?.length > 0;

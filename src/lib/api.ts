@@ -5,6 +5,7 @@ import {
   LoginValidationType,
 } from "./validation";
 import { signIn, SignInResponse } from "next-auth/react";
+import { SelectOption } from "./options";
 
 export const uploadInternData = async (
   rows: string[][]
@@ -97,6 +98,11 @@ export const fetchInternStatusCount = async ({
   return res.data;
 };
 
+export const fetchInternOffice = async (): Promise<InternOffice> => {
+  const res = await axios.get("/api/internOffice");
+  return res.data;
+};
+
 export const loginUser = async ({
   username,
   password,
@@ -138,8 +144,20 @@ interface InternCounts extends BaseResponse {
   };
 }
 
+interface InternOffice extends BaseResponse {
+  results: {
+    internOffice: Record<string, OfficeInfo[]>;
+  };
+}
+
 interface BaseResponse {
   success?: boolean;
   error?: string;
   results?: any;
+}
+
+export interface OfficeInfo {
+  officeId: number;
+  count: number;
+  office: SelectOption;
 }

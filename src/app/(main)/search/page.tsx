@@ -24,10 +24,8 @@ import { useInternFilter } from "@/store/useInternFilter";
 import { useDataStore } from "@/store/useDataStore";
 import { cn } from "@/lib/utils";
 import { useInternStatusCount } from "@/hooks/useInternStatusCount";
-import { useQueryClient } from "@tanstack/react-query";
 
 const page = () => {
-  const queryClient = useQueryClient();
   const { requestStatus, parentVerifyStatus, internStatusCount } =
     useDataStore();
   const { page, setPage, pageSize, status, setStatus, options, setOptions } =
