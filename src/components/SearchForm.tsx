@@ -35,6 +35,8 @@ const SearchForm = ({
       firstName: "",
       lastName: "",
       academy: "",
+      office: "",
+      group: "",
     },
   });
 

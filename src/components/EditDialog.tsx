@@ -39,7 +39,6 @@ export function EditDialog({ intern }: { intern: InternDataType }) {
   const isVerify = intern.office && intern.group;
 
   const [open, setOpen] = useState(false);
-  const [firstFetch, setFirstFetch] = useState(true);
   const [filteredGroup, setFilteredGroup] = useState<SelectOption[]>([]);
   const filteredStatus = status.filter((s) => {
     if (intern.status.type === 3) {
@@ -85,11 +84,7 @@ export function EditDialog({ intern }: { intern: InternDataType }) {
 
   useEffect(() => {
     const filter = group.filter((g) => g.officeId === Number(officeField));
-    if (!firstFetch) {
-      form.setValue("groupId", "");
-    }
     setFilteredGroup(filter);
-    setFirstFetch(false);
   }, [officeField]);
 
   const onSubmit = async (value: InternValidationType) => {
@@ -97,7 +92,12 @@ export function EditDialog({ intern }: { intern: InternDataType }) {
     mutation.mutate({ intern: value, verifyStatusIds });
   };
 
-  const onResetForm = () => {
+  const onOfficeChange = (newOfficeId: string) => {
+    form.setValue("officeId", newOfficeId);
+    form.setValue("groupId", "");
+  };
+
+  const resetForm = () => {
     form.reset();
   };
 
@@ -114,7 +114,7 @@ export function EditDialog({ intern }: { intern: InternDataType }) {
               className="cursor-pointer"
               color="blue"
               size={18}
-              onClick={onResetForm}
+              onClick={resetForm}
             />
           </DialogTitle>
           <DialogDescription></DialogDescription>
@@ -259,6 +259,7 @@ export function EditDialog({ intern }: { intern: InternDataType }) {
                     label="สำนัก"
                     placeholder="เลือกสำนัก"
                     width="w-[240px]"
+                    onChangeFnc={onOfficeChange}
                   >
                     {office.map((o) => (
                       <SelectItem key={o.id} value={String(o.id)}>

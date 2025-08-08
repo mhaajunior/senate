@@ -2,13 +2,7 @@
 
 import React, { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import {
-  LayoutDashboard,
-  UserCog,
-  Settings,
-  Import,
-  Search,
-} from "lucide-react";
+import { LayoutDashboard, Import, Search } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -20,19 +14,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 export function MySidebar({ children }: { children: React.ReactNode }) {
   const links = [
     {
-      label: "Dashboard",
-      href: "#",
+      label: "หน้าหลัก",
+      href: "/",
       icon: <LayoutDashboard className="h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Profile",
-      href: "#",
-      icon: <UserCog className="h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Settings",
-      href: "#",
-      icon: <Settings className="h-5 w-5 flex-shrink-0" />,
     },
     {
       label: "ค้นหาเด็กฝึกงาน",
@@ -119,14 +103,14 @@ export function MySidebar({ children }: { children: React.ReactNode }) {
 export const Logo = () => {
   return (
     <Link
-      href="#"
+      href="/"
       className="font-normal flex space-x-2 items-center text-sm py-1 relative z-20"
     >
       <div className="h-5 w-6 bg-primary rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="font-medium whitespace-pre"
+        className="font-bold whitespace-pre"
       >
         ระบบรับน้องรัฐสภา
       </motion.span>
@@ -137,7 +121,7 @@ export const Logo = () => {
 export const LogoIcon = () => {
   return (
     <Link
-      href="#"
+      href="/"
       className="font-normal flex space-x-2 items-center text-sm py-1 relative z-20"
     >
       <div className="h-5 w-6 bg-primary rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />

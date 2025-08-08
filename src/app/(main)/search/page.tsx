@@ -23,14 +23,17 @@ import { useInterns } from "@/hooks/useInterns";
 import { useInternFilter } from "@/store/useInternFilter";
 import { useDataStore } from "@/store/useDataStore";
 import { cn } from "@/lib/utils";
-import { useInternStatusCount } from "@/store/useInternStatusCount";
+import { useInternStatusCount } from "@/hooks/useInternStatusCount";
+import { useQueryClient } from "@tanstack/react-query";
 
 const page = () => {
+  const queryClient = useQueryClient();
   const { requestStatus, parentVerifyStatus, internStatusCount } =
     useDataStore();
-  const { isLoading: isCountLoading } = useInternStatusCount();
   const { page, setPage, pageSize, status, setStatus, options, setOptions } =
     useInternFilter();
+  const { isLoading: isCountLoading, refetch: refetchCount } =
+    useInternStatusCount(options);
 
   const [selection, setSelection] = useState<StatusSelectOption[]>([]);
   const [tableHeight, setTableHeight] = useState(200);
@@ -39,7 +42,7 @@ const page = () => {
   const form = useForm<InternStatusValidationType>({
     resolver: zodResolver(InternStatusValidation),
     defaultValues: {
-      internStatus: "1",
+      internStatus: options.internStatus,
     },
   });
 
@@ -53,8 +56,12 @@ const page = () => {
   });
 
   useEffect(() => {
-    setSelection(requestStatus);
-  }, [requestStatus]);
+    if (internStatus === "1") {
+      setSelection(requestStatus);
+    } else {
+      setSelection(parentVerifyStatus);
+    }
+  }, [requestStatus, parentVerifyStatus]);
 
   useEffect(() => {
     if (isError) {
@@ -81,6 +88,7 @@ const page = () => {
       internStatus: prev.internStatus,
     }));
     refetch();
+    refetchCount();
   };
 
   const onChangeStatus = (status: number) => {

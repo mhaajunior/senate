@@ -84,8 +84,16 @@ export const fetchGroup = async (): Promise<BaseResponse> => {
   return res.data;
 };
 
-export const fetchInternStatusCount = async (): Promise<InternCounts> => {
-  const res = await axios.get("/api/internStatusCount");
+export const fetchInternStatusCount = async ({
+  options,
+}: {
+  options?: FilterOptions;
+}): Promise<InternCounts> => {
+  const res = await axios.get("/api/internStatusCount", {
+    params: {
+      ...options,
+    },
+  });
   return res.data;
 };
 
@@ -126,6 +134,7 @@ interface InternsResponse extends BaseResponse {
 interface InternCounts extends BaseResponse {
   results: {
     internCounts: Record<string, number>;
+    overallCounts: Record<string, { name: string; count: number }>;
   };
 }
 

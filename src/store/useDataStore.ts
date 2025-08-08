@@ -15,6 +15,7 @@ interface DataStore {
   verifyStatus: StatusSelectOption[];
   parentVerifyStatus: StatusSelectOption[];
   internStatusCount: Record<string, number>;
+  overallStatusCount: Record<string, { name: string; count: number }>;
   fetchOffice: () => Promise<void>;
   fetchGroup: () => Promise<void>;
   fetchStatus: () => Promise<void>;
@@ -29,6 +30,7 @@ export const useDataStore = create<DataStore>((set) => ({
   verifyStatus: [],
   parentVerifyStatus: [],
   internStatusCount: {},
+  overallStatusCount: {},
   fetchOffice: async () => {
     const res = await fetchOffice();
     if (res.success) {

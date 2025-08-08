@@ -14,7 +14,7 @@ export function useInterns({
   options: FilterOptions;
 }) {
   return useQuery({
-    queryKey: ["interns", page, options, status],
+    queryKey: ["interns", page, pageSize, options, status],
     queryFn: () => fetchInterns({ page, pageSize, status, options }),
   });
 }

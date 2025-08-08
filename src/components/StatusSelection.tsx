@@ -38,8 +38,7 @@ function StatusSelection<T extends FieldValues>({
             placeholder="เลือกสถานะ"
             width={width}
             loading={loading}
-            submitBtn={!!submitFnc}
-            submitFnc={(val) => {
+            onChangeFnc={(val) => {
               if (submitFnc) {
                 submitFnc(val, form);
               }

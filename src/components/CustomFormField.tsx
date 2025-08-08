@@ -44,8 +44,7 @@ export interface CustomProps {
   fieldType: FormFieldType;
   showClearBtn?: boolean;
   loading?: boolean;
-  submitBtn?: boolean;
-  submitFnc?: (val: any) => void;
+  onChangeFnc?: (val: any) => void;
   width?: string;
 }
 
@@ -116,8 +115,8 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
           <Select
             onValueChange={(val) => {
               field.onChange(val);
-              if (props.submitBtn) {
-                props.submitFnc!(val);
+              if (props.onChangeFnc) {
+                props.onChangeFnc(val);
               }
             }}
             value={field.value}

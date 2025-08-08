@@ -116,7 +116,7 @@ async function getHandler(req: NextRequest) {
       }
 
       // จัดกลุ่ม verify status
-      const verifyStatusGroup = await groupVerifyStatus();
+      const { verifyStatusGroup } = await groupVerifyStatus();
 
       if (verifyStatusGroup[statusId]) {
         const statusIdList = [statusId, ...verifyStatusGroup[statusId]];

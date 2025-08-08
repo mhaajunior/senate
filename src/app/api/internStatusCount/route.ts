@@ -5,11 +5,54 @@ import { groupVerifyStatus } from "../status/route";
 
 async function handler(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const internStatus = Number(searchParams.get("internStatus") ?? "1");
+    const firstName = searchParams.get("firstName");
+    const lastName = searchParams.get("lastName");
+    const academy = searchParams.get("academy");
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
+    const office = searchParams.get("office");
+    const group = searchParams.get("group");
+
+    const where: any = {};
+
+    if (firstName) {
+      where.firstName = { contains: firstName };
+    }
+    if (lastName) {
+      where.lastName = { contains: lastName };
+    }
+    if (academy) {
+      where.academy = { contains: academy };
+    }
+    if (startDate) {
+      where.startDate = startDate;
+    }
+    if (endDate) {
+      where.endDate = endDate;
+    }
+    if (office) {
+      where.officeId = Number(office);
+    }
+    if (group) {
+      where.groupId = Number(group);
+    }
+    if (internStatus === 2) {
+      if (office) {
+        where.officeId = Number(office);
+      }
+      if (group) {
+        where.groupId = Number(group);
+      }
+    }
+
     // จัดกลุ่ม verify status
-    const verifyStatusGroup = await groupVerifyStatus();
+    const { verifyStatusGroup, status } = await groupVerifyStatus();
 
     const groupedCount = await prisma.intern.groupBy({
       by: ["statusId"],
+      where,
       _count: { _all: true },
     });
 
@@ -18,6 +61,7 @@ async function handler(req: NextRequest) {
       countMap.set(item.statusId, item._count._all);
     });
 
+    const overallCounts: Record<string, { name: string; count: number }> = {};
     const internCounts: Record<string, number> = {};
 
     // รวมกลุ่มจาก groupVerifyStatus
@@ -35,11 +79,16 @@ async function handler(req: NextRequest) {
       if (!(idStr in internCounts)) {
         internCounts[idStr] = item._count._all;
       }
+      const found = status.find((s) => s.id === item.statusId);
+      overallCounts[item.statusId] = {
+        name: found!.name,
+        count: item._count._all,
+      };
     });
 
     return NextResponse.json({
       success: true,
-      results: { internCounts },
+      results: { internCounts, overallCounts },
     });
   } catch (error) {
     console.error(error);

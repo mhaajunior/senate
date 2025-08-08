@@ -29,17 +29,17 @@ export const groupVerifyStatus = async () => {
   });
 
   const verifyStatus = status.filter((s) => s.type === 2 || s.type === 3);
-  const groupVerifyStatus: Record<number, number[]> = {};
+  const verifyStatusGroup: Record<number, number[]> = {};
   for (const s of verifyStatus) {
     if (s.parentId) {
-      if (!groupVerifyStatus[s.parentId]) {
-        groupVerifyStatus[s.parentId] = [];
+      if (!verifyStatusGroup[s.parentId]) {
+        verifyStatusGroup[s.parentId] = [];
       }
-      groupVerifyStatus[s.parentId].push(s.id);
+      verifyStatusGroup[s.parentId].push(s.id);
     }
   }
 
-  return groupVerifyStatus;
+  return { verifyStatusGroup, status };
 };
 
 export const GET = withAuth({ GET: handler });

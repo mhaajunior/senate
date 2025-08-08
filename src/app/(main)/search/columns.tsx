@@ -6,7 +6,7 @@ import { formatThaiDateTime, isNull } from "@/lib/utils";
 import { InternDataType } from "@/lib/validation";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
-import StatusColumn from "./StatusColumn";
+import StatusColumn from "@/components/StatusColumn";
 
 export const columns: ColumnDef<InternDataType>[] = [
   {
